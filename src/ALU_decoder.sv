@@ -15,7 +15,7 @@ module ALU_decoder (
     output reg  [3:0]  ALU_control
     );
 
-    assign do_unsigned = ((ALU_op == 6'b000000) & funct[5] & ~funct[0]) | (ALU_op[3] & ALU_op[0]);
+    assign do_unsigned = ((ALU_op == 6'b000000) & funct[5] & funct[0]) | (ALU_op[3] & ALU_op[0]);
 
     assign ALU_src = ALU_op[3];
     assign use_sign_imm = (ALU_src & ~ALU_op[2]) | ALU_op[5]; // arithmetic/logical operations OR memory access operations
@@ -57,7 +57,7 @@ module ALU_decoder (
                 6'b00101?: ALU_control = 4'h9;
 
                 // memory
-                6'b10????: ALU_control = 4'h7;
+                6'b10????: ALU_control = 4'h7; // same as add for all memory operations
 
                 // branch - ALU has built-in comparator
                 default:   ALU_control = 4'h0;
