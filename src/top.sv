@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
 
 module top (
-    input wire clk
+    input  wire cpu_clk,
+    input  wire mem_clk
     );
 
 

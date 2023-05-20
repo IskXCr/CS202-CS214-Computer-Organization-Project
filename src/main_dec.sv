@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module main_decoder(
+module main_dec(
     input  wire [5:0] op,
     input  wire rt_msb,           // used when determined whether to link register
 

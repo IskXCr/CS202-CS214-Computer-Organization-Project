@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module ALU_decoder (
+module ALU_dec (
     input  wire [5:0]  ALU_op,     // ALU internal op code
     input  wire [4:0]  shamt,      // shift amount
     input  wire [5:0]  funct,      // function code

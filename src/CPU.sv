@@ -23,7 +23,7 @@ module CPU(
     wire branch_comp_zero;
 
     // Register
-    wire rwe, dmem_we;  // register write enabled
+    wire rwe, dmem_we;  // register write enabled, dmemory write enabled
     wire ALU_src;      // ALU_src
     wire use_sign_imm; // use signed immediate
     wire reg_pc4_src;  // use pc4 as the source of write data for link instrutions
@@ -49,16 +49,16 @@ module CPU(
     
     // inst_cont
     assign instr_jump = cont_jump;
-    inst_cont instr_controller(.clk(clk),
-                               .rst(rst),
-                               .en(instr_cont_en),
-                               .pc4(pc4),
-                               .instr_addr(instr_addr),
-                               .instr(instr),
-                               .rjump_addr(rrdata1),
-                               .jump(instr_jump),
-                               .jump_reg(jump_dst),
-                               .branch(instr_branch));
+    instr_cont instr_controller(.clk(clk),
+                                .rst(rst),
+                                .en(instr_cont_en),
+                                .pc4(pc4),
+                                .instr_addr(instr_addr),
+                                .instr(instr),
+                                .rjump_addr(rrdata1),
+                                .jump(instr_jump),
+                                .jump_reg(jump_dst),
+                                .branch(instr_branch));
     
     // branch_cont
     branch_cont branch_controller(.cont_branch(cont_branch),
@@ -69,7 +69,27 @@ module CPU(
                                   .branch(instr_branch));
 
     // controller part
+    main_dec main_decoder(.op(instr[31:26]),
+                          .rt_msb(instr[20]),
+                          .mem_to_reg(mem_to_reg),
+                          .mem_write(dmem_we),
+                          .branch(cont_branch),
+                          .branch_comp_zero(branch_comp_zero),
+                          .reg_write(rwe),
+                          .reg_dst(reg_dst),
+                          .reg_pc4_src(reg_pc4_src),
+                          .jump(instr_jump),
+                          .jump_dst(jump_dst));
 
+    ALU_dec ALU_decoder(.ALU_op(instr[31:26]),
+                        .shamt(instr[10:6]),
+                        .funct(instr[5:0]),
+                        .shift_dir(shift_dir),
+                        .shift_ari(shift_ari),
+                        .do_unsigned(do_unsigned),
+                        .ALU_src(ALU_src),
+                        .use_sign_imm(use_sign_imm),
+                        .ALU_control(ALU_control));
 
     // register part
     assign ra = 5'b11111;
