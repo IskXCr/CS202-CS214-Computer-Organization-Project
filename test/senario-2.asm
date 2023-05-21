@@ -42,21 +42,25 @@ loop:
     add $t2, $t2, $t1
     addi $t1, $t1, 1
     bne $t1, $t0, loop
-    sw $t2, 0xC60($28)
-    sw $t2, 0xC9C($28)
+    sw $t2, 0xC60($28) # LED output
+    sw $t2, 0xC9C($28) # seg output
+    # check whether is negative 
+
+
     j end_program
 
 
 test_001:
-    lw $t0, 0xC70($28)
+    lw $t0, 0xC70($28) # value of a 
     li $t2, 0
     li $t3, 0
     li $t4, 0
     jal sum
-    sw $t2, 0xC60($28)
+    sw $t2, 0xC60($28) # the sum
     sw $t2, 0xC9C($28)
-    add $t3, $t4, $t5 
+    add $t3, $t4, $t5 # the total number of the times
     sw $t3, 0xC60($28)
+    sw $t3, 0xC9C($28)
     j end_program
 sum_recursive: 
     addi $sp, $sp, -8 
@@ -64,10 +68,10 @@ sum_recursive:
     sw $t2, 0($sp) 
     beq $t0, $zero, end_recursive 
     addi $t2, $t2, $t0 
-    addi $t4, $t4, 1 
+    addi $t4, $t4, 1 # the count of in_stack
     addi $t0, $t0, -1 
     jal sum_recursive 
-    addi $t5, $t5, 1 
+    addi $t5, $t5, 1  # the count of out_stack
     lw $t2, 0($sp) 
     lw $ra, 4($sp) 
     addi $sp, $sp, 8 
@@ -75,8 +79,10 @@ sum_recursive:
 end_recursive: 
     jr $ra
 
+
 test_010:
     lw $t0, 0xC70($28)
+    addi $a0, $t0, 0
     jal sum
     la $t1, stack_top 
     lw $t2, stack_size
@@ -118,8 +124,10 @@ sum:
     addi $sp, $sp, 8 
     jr $ra 
 
+
 test_011:
     lw $t0, 0xC70($28)
+    addi $a0, $t0, 0
     jal sum_1
     la $t1, stack_top 
     lw $t2, stack_size
@@ -146,12 +154,12 @@ sum_1:
     add $t0, $a0, -1 
     sw $t0, 0($sp) 
     addi $t1, $t1, -4 
-    sw $a0, 0($t1) 
     addi $t2, $t2, 1 
     sw $t2, stack_size 
     jal sum_1 
     lw $a1, 8($sp) 
     lw $a0, 0($sp) 
+    sw $a0, 0($t1) 
     addi $t1, $t1, 4 
     lw $t0, 0($t1) 
     add $a0, $t0, $a0 
@@ -160,6 +168,7 @@ sum_1:
     lw $ra, 4($sp) 
     addi $sp, $sp, 8 
     jr $ra 
+
 
 test_100:
     lw $t0, 0xC70($28)
