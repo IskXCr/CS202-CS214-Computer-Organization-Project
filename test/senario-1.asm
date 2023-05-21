@@ -52,12 +52,12 @@ test_001:
     li $t2, 0
     li $t3, 0
     li $t4, 8
-    addi $t6, $t0, $zero
+    add $t6, $t0, $zero
 loop_8bit:    
     addi $t5, $t6, 1
     srl $t6, $t6, 1
     add $t2, $t2, $t5
-    sb $t5, ($t0)
+    sw $t5, ($t0)
     addi $t0, $t0, 1
     addi $t3, $t3, 1
     bne $t3, $t4, loop_8bit
