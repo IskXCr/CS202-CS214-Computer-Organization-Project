@@ -47,8 +47,8 @@ module top (
     wire data_wea;
     wire [31:0] data_out;
     
-    assign is_in_data_seg = (mem_addr >= 32'h7fff000 && mem_addr <= 32'h7fffeffc);
-    assign data_addr = is_in_data_seg ? ($signed(mem_addr) - $signed(32'h1001_0000)) : 32'h00000000;
+    assign is_in_data_seg = (mem_addr >= 32'h1001_0000 && mem_addr < 32'h7000_0000);
+    assign data_addr = is_in_data_seg ? ($signed(mem_addr) - $signed(32'h1001_0000)) : 32'h0000_0000;
     assign data_wea = is_in_data_seg && mem_write;
     
     data_mem data_memory(.clka(~cpu_clk),
@@ -63,8 +63,8 @@ module top (
     wire stack_wea;
     wire [31:0] stack_out;
     
-    assign is_in_stack_seg = (mem_addr >= 32'h7fff000 && mem_addr <= 32'h7fffeffc);
-    assign stack_addr = is_in_stack_seg  ? (32'h7fffeffc - mem_addr) : 32'h00000000;
+    assign is_in_stack_seg = (mem_addr >= 32'h7000_0000 && mem_addr <= 32'h7fff_effc);
+    assign stack_addr = is_in_stack_seg  ? (32'h7fff_effc - mem_addr) : 32'h0000_0000;
     assign stack_wea = is_in_stack_seg  && mem_write;
     
     stack_mem stack_memory(.clka(~cpu_clk),
@@ -84,7 +84,7 @@ module top (
         casez (data_dst)
             2'b10: read_data = data_out;
             2'b01: read_data = stack_out;
-            default: read_data = 32'h00000000;
+            default: read_data = 32'h0000_0000;
         endcase
     end
     
