@@ -1,10 +1,4 @@
 .data 
-case_address: .word 0
-data_address: .word 0
-input_a: .word 0
-input_b: .word 0
-output: .word 0
-parity_bit: .word 0
 
 .text
 .global main
@@ -15,10 +9,10 @@ main:
     ori $28, $28, 0xF000
 
 loop_0:
-    lw $s7, 0xC7C($28)
+    lw $s7, 0xC72($28)
     bne $s7, $zero, loop_0
 
-    lw $t0, 0xC7C($28)
+    lw $t0, 0xC72($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits
 
     beq $t0, 0, test_000
@@ -31,7 +25,7 @@ loop_0:
     beq $t0, 7, test_111
 
 test_000:
-    la $t0, 0xC7C($28)
+    la $t0, 0xC70($28)
     li $t2, 0
     li $t3, 0
     li $t4, 7
@@ -52,7 +46,7 @@ loop_7bit:
     j end_program
 
 test_001:
-    la $t0, 0xC7C($28)
+    la $t0, 0xC70($28)
     sw $t0, 0xC60($28)
     li $t2, 0
     li $t3, 0

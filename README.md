@@ -177,8 +177,15 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 ### MMIO Specification
 
 | Physical Segment Base | W/R Support | Size | Destination Device | Description |
-| --------------------- | ----------- | ---- | ------------------ | ----------- |
-|                       |             |      |                    |             |
+| --------------------- | ---------- | ---- | ------------------ | ----------- |
+| 0x10000C72 |R| 4 bytes | X2-X0 Switch| left 8 switch|
+| 0x10000C70 |R| 4 bytes | sw7 - sw0 Switch | right 16 switch|
+| 0x10000C83 |R|4 bytes|keyboard|get from keyboard|
+| 0x10000C62 |W| 4 bytes | LED |left 8 LED|
+| 0x10000C60 |W| 4 bytes | LED |right 16 LED|
+| 0x10000C93 |W| 4 bytes | segtube|segtube|
+
+
 
 
 
