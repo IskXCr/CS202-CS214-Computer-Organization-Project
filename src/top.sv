@@ -2,7 +2,14 @@
 
 module top (
     input  wire clk,
-    input  wire rst
+    input  wire rst,
+
+    input  wire [4:0]  buttons,
+    input  wire [23:0] switches,
+    output wire [23:0] led,
+    output wire [7:0]  tube_en,
+    output wire [15:0] tube_seg
+    // TODO: add other IO devices
     );
 
     wire cpu_clk;
@@ -30,6 +37,7 @@ module top (
                  .write_data(write_data),
                  .read_data(read_data));
     
+
     // set instruction memory
     wire [31:0] true_instr_addr;
     
@@ -41,6 +49,31 @@ module top (
                            .dina(0),
                            .douta(instr));
     
+
+    // set MMIO
+    wire is_in_MMIO_seg;
+    wire [31:0] MMIO_addr;
+    wire MMIO_wea;
+    wire [31:0] MMIO_out;
+
+    assign is_in_MMIO_seg = (mem_addr >= 32'h1000_0000 && mem_addr <= 32'h1000_0200);
+    assign MMIO_addr = is_in_MMIO_seg ? (mem_addr - 32'h1000_0000) : 32'h0000_0000; // map to address starting at 0x0
+    assign MMIO_wea = is_in_MMIO_seg && mem_write;
+
+    // setup IO connections
+    MMIO_cont MMIO_controller(.clk(~cpu_clk),
+                              .rst(rst),
+                              .addr(MMIO_addr),
+                              .write_data(write_data),
+                              .read_data(MMIO_out),
+                              .wea(MMIO_wea),
+                              .buttons(buttons),
+                              .switches(switches),
+                              .led(led),
+                              .tube_en(tube_en),
+                              .tube_seg(tube_seg)); // TODO: add other IO devices
+
+    
     // set data memory
     wire is_in_data_seg;
     wire [31:0] data_addr;
@@ -48,7 +81,7 @@ module top (
     wire [31:0] data_out;
     
     assign is_in_data_seg = (mem_addr >= 32'h1001_0000 && mem_addr < 32'h7000_0000);
-    assign data_addr = is_in_data_seg ? ($signed(mem_addr) - $signed(32'h1001_0000)) : 32'h0000_0000;
+    assign data_addr = is_in_data_seg ? (mem_addr - 32'h1001_0000) : 32'h0000_0000; // map to address starting at 0x0
     assign data_wea = is_in_data_seg && mem_write;
     
     data_mem data_memory(.clka(~cpu_clk),
@@ -57,6 +90,7 @@ module top (
                          .douta(data_out),
                          .wea(data_wea));
     
+
     // set stack memory
     wire is_in_stack_seg;
     wire [31:0] stack_addr;
@@ -64,7 +98,7 @@ module top (
     wire [31:0] stack_out;
     
     assign is_in_stack_seg = (mem_addr >= 32'h7000_0000 && mem_addr <= 32'h7fff_effc);
-    assign stack_addr = is_in_stack_seg  ? (32'h7fff_effc - mem_addr) : 32'h0000_0000;
+    assign stack_addr = is_in_stack_seg  ? (32'h7fff_effc - mem_addr) : 32'h0000_0000; // map to address starting at 0x0
     assign stack_wea = is_in_stack_seg  && mem_write;
     
     stack_mem stack_memory(.clka(~cpu_clk),
@@ -73,17 +107,18 @@ module top (
                            .douta(stack_out),
                            .wea(stack_wea));
     
-    
+
     // set the source of read_data
     wire [1:0] data_dst;
     
-    assign data_dst = {is_in_data_seg, is_in_stack_seg};
+    assign data_dst = {is_in_data_seg, is_in_stack_seg, is_in_MMIO_seg};
     
     // adjust read port
     always_comb begin
         casez (data_dst)
-            2'b10: read_data = data_out;
-            2'b01: read_data = stack_out;
+            3'b100: read_data = data_out;
+            3'b010: read_data = stack_out;
+            3'b001: read_data = MMIO_out;
             default: read_data = 32'h0000_0000;
         endcase
     end
