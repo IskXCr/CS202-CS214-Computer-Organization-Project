@@ -12,7 +12,7 @@ module branch_cont (
     );
 
     always_comb begin
-        if (branch) begin
+        if (cont_branch) begin
             if (op == 6'b000001) begin
                 // branch and link instructions. Judge rt to continue
                 case (link)

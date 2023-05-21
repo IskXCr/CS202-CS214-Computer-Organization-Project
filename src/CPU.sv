@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module CPU(
+module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     input  wire clk,
     input  wire rst,
 
@@ -35,30 +35,32 @@ module CPU(
     assign unsigned_imm = {16'd0, imm_16};
 
     wire [1:0] reg_dst;
-    wire [4:0] rt, rd, ra, rwaddr; // rwd for register write address
-    wire [31:0] rwdata, rrdata1, rraddr2, rrdata2, rwdata1;
+    wire [4:0] rt, rd, ra, rwaddr, rraddr2; // rwd for register write address
+    assign rt = instr[20:16];
+    assign rd = instr[15:11];
+    wire [31:0] rwdata, rrdata1, rrdata2, rwdata1;
 
     // ALU
     wire [31:0] ALU_op1, ALU_op2, ALU_out;
     wire [3:0] ALU_control;
-    wire shamt, shift_dir, shift_ari, do_unsigned;
+    wire [4:0] shamt;
+    wire shift_src, shift_dir, shift_ari, do_unsigned;
 
     wire ALU_lt, ALU_eq, overflow;
 
     wire mem_to_reg;
     
     // inst_cont
-    assign instr_jump = cont_jump;
-    instr_cont instr_controller(.clk(clk),
-                                .rst(rst),
-                                .en(instr_cont_en),
-                                .pc4(pc4),
-                                .instr_addr(instr_addr),
-                                .instr(instr),
-                                .rjump_addr(rrdata1),
-                                .jump(instr_jump),
-                                .jump_reg(jump_dst),
-                                .branch(instr_branch));
+    instr_cont #(TEXT_BASE_ADDR) instr_controller(.clk(clk),
+                                                  .rst(rst),
+                                                  .en(instr_cont_en),
+                                                  .pc4(pc4),
+                                                  .instr_addr(instr_addr),
+                                                  .instr(instr[25:0]),
+                                                  .rjump_addr(rrdata1),
+                                                  .jump(instr_jump),
+                                                  .jump_dst(jump_dst),
+                                                  .branch(instr_branch));
     
     // branch_cont
     branch_cont branch_controller(.cont_branch(cont_branch),
@@ -71,6 +73,7 @@ module CPU(
     // controller part
     main_dec main_decoder(.op(instr[31:26]),
                           .rt_msb(instr[20]),
+                          .funct(instr[5:0]),
                           .mem_to_reg(mem_to_reg),
                           .mem_write(dmem_we),
                           .branch(cont_branch),
@@ -82,8 +85,8 @@ module CPU(
                           .jump_dst(jump_dst));
 
     ALU_dec ALU_decoder(.ALU_op(instr[31:26]),
-                        .shamt(instr[10:6]),
                         .funct(instr[5:0]),
+                        .shift_src(shift_src),
                         .shift_dir(shift_dir),
                         .shift_ari(shift_ari),
                         .do_unsigned(do_unsigned),
@@ -99,16 +102,16 @@ module CPU(
                       .sel(use_sign_imm),
                       .q(imm));
 
-    mux2 #(WIDTH=5)  reg_rdata2_mux(.d0(instr[20:16]),
-                                    .d1(5'b00000),
-                                    .sel(branch_comp_zero),
-                                    .q(rraddr2));
+    mux2 #(5) reg_rdata2_mux(.d0(instr[20:16]),
+                             .d1(5'b00000),
+                             .sel(branch_comp_zero),
+                             .q(rraddr2));
 
-    mux3 #(WIDTH=5) reg_waddr_mux(.d0(rt),
-                                  .d1(rd),
-                                  .d2(ra),
-                                  .sel(reg_dst),
-                                  .q(rwaddr));
+    mux3 #(5) reg_waddr_mux(.d0(rt),
+                            .d1(rd),
+                            .d2(ra),
+                            .sel(reg_dst),
+                            .q(rwaddr));
 
     mux2 reg_wdata_mux(.d0(rwdata1),
                        .d1(pc4),
@@ -116,6 +119,7 @@ module CPU(
                        .q(rwdata));
   
     reg_file registers(.clk(clk),
+                       .rst(rst),
                        .we(rwe),
                        .ra1(instr[25:21]), 
                        .ra2(rraddr2),
@@ -130,7 +134,12 @@ module CPU(
     mux2 ALU_op2_mux(.d0(rrdata2),
                      .d1(imm),
                      .sel(ALU_src),
-                     .d(ALU_op2));
+                     .q(ALU_op2));
+    
+    mux2 #(5) ALU_shift_mux(.d0(instr[10:6]), 
+                            .d1(ALU_op1[4:0]),
+                            .sel(shift_src),
+                            .q(shamt));
 
     ALU ALU_inst(.ALU_control(ALU_control), 
                  .shamt(shamt),
@@ -147,7 +156,7 @@ module CPU(
     // data memory
     wire [31:0] dmem_wdata, dmem_addr;
     assign dmem_wdata = rrdata2;
-    assign dmem_addr = ALU_out;
+    assign dmem_addr = {ALU_out[31:2], 2'b00};
 
     assign mem_write = dmem_we;
     assign mem_addr = dmem_addr;

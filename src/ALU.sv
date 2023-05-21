@@ -1,8 +1,8 @@
 `timescale 1ns/1ps
 
 module ALU (
-    input  wire [3:0]  ALU_control, // ALU internal control code
-    input  wire shamt,              // shift amount
+    input  wire [3:0] ALU_control, // ALU internal control code
+    input  wire [4:0] shamt,              // shift amount
     input  wire shift_dir,          // 1 for right shift
     input  wire shift_ari,          // 1 for arithmetic shift
     input  wire do_unsigned,        // 1 to do unsigned operation
@@ -36,9 +36,9 @@ module ALU (
             4'h4: op_res = ~(op_1 | op_2);
             4'h5: op_res = op_2 << 16;
             4'h7: op_res = op_1 + op_2;
-            4'h8: op_res = op_1 + (~op_2 + 32'h0000_0001);
+            4'h8: op_res = $signed(op_1) - $signed(op_2);
 
-            default: 32'h0000_0000;
+            default: op_res = 32'h0000_0000;
         endcase
     end
 
@@ -46,7 +46,7 @@ module ALU (
     always_comb begin
         case (ALU_control)
             4'h6: ALU_out = shift_res;
-            4'h9: ALU_out = {31h'0, ALU_lt};
+            4'h9: ALU_out = {31'd0, ALU_lt};
             default: ALU_out = op_res;
         endcase
     end

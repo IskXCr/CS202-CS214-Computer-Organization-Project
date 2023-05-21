@@ -1,18 +1,16 @@
 `timescale 1ns/1ps
-`include "constants.vh"
 
-module PC #(parameter WIDTH = 32,
-            parameter TEXT_BASE_ADDR = 32'h0000_0000) (
+module PC #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     input  wire clk,
     input  wire rst,
     input  wire en,
-    input  wire [WIDTH - 1:0] d,
-    output reg  [WIDTH - 1:0] q
+    input  wire [31:0] d,
+    output reg  [31:0] q
     );
 
     always_ff @(posedge clk, posedge rst) begin
         if (rst) begin
-            q <= TEXT_BASE_ADDR;
+            q <= $signed(TEXT_BASE_ADDR) - $signed(32'h0000_0004);
         end
         else if (en) begin
             q <= d;

@@ -2,9 +2,9 @@
 
 module ALU_dec (
     input  wire [5:0]  ALU_op,     // ALU internal op code
-    input  wire [4:0]  shamt,      // shift amount
     input  wire [5:0]  funct,      // function code
 
+    output wire shift_src,         // 1 for selecting the register rs
     output wire shift_dir,         // 1 for right shift
     output wire shift_ari,         // 1 for arithmetic shift
     output wire do_unsigned,       // 1 to do unsigned operation
@@ -15,8 +15,8 @@ module ALU_dec (
     output reg  [3:0]  ALU_control
     );
 
+    assign shift_src = funct[2];
     assign do_unsigned = ((ALU_op == 6'b000000) & funct[5] & funct[0]) | (ALU_op[3] & ALU_op[0]);
-
     assign ALU_src = ALU_op[3];
     assign use_sign_imm = (ALU_src & ~ALU_op[2]) | ALU_op[5]; // arithmetic/logical operations OR memory access operations
 

@@ -12,9 +12,9 @@ module mux3 #(parameter WIDTH = 32) (
 
     always_comb begin
         case (sel)
-            3'b00: q = d0;
-            3'b01: q = d1;
-            3'b02: q = d2;
+            3'd0: q = d0;
+            3'd1: q = d1;
+            3'd2: q = d2;
             default: q = d0;
         endcase
     end
