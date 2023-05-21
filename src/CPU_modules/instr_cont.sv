@@ -24,14 +24,16 @@ module instr_cont #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     PC #(TEXT_BASE_ADDR) pc(.clk(clk), 
                             .rst(rst), 
                             .en(en),
-                            .d(next_addr),
+                            .d(instr_addr),
                             .q(current_addr));
 
     always_comb begin
-        case ({jump, branch})
-            2'b00: next_addr = pc4;
-            2'b01: next_addr = pc4 + {{14{instr[15]}}, instr[15:0], 2'b00};
-            default: next_addr = jump_dst ? rjump_addr : {instr_addr[31:28], instr[25:0], 2'b00};
+        casez ({jump, branch, jump_dst})
+            3'b00?: next_addr = pc4;
+            3'b01?: next_addr = pc4 + {{14{instr[15]}}, instr[15:0], 2'b00};
+            3'b1?0: next_addr = {current_addr[31:28], instr[25:0], 2'b00};
+            3'b1?1: next_addr = rjump_addr;
+            default: next_addr = pc4;
         endcase 
     end
     

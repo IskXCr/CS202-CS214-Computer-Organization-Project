@@ -3,6 +3,8 @@
 module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     input  wire clk,
     input  wire rst,
+    
+    input  wire en, // determined whether the CPU stalls at current instruction or continues execution
 
     output wire [31:0] instr_addr,
     input  wire [31:0] instr,
@@ -15,7 +17,7 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     );
 
     wire instr_cont_en;
-    assign instr_cont_en = 1;
+    assign instr_cont_en = en;
 
     wire [31:0] pc4;
     wire instr_jump, instr_branch, jump_dst;

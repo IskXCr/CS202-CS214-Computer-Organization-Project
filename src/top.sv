@@ -6,17 +6,23 @@ module top (
     );
 
     wire cpu_clk;
+    wire cpu_en;
+    
+    wire uart_clk;
     
     wire mem_write;
     wire [31:0] instr_addr, instr, mem_addr, write_data;
     reg  [31:0] read_data;
     
-//    clk_wiz_0 clk_gen(.clk_in1(clk),
-//                      .clk_out1(cpu_clk));
-    assign cpu_clk = clk;
+    clk_wiz_0 clk_gen(.clk_in1(clk),
+                      .clk_out1(cpu_clk),
+                      .clk_out2(uart_clk));
+//    assign CPU_clk = clk;
+    assign CPU_en = 1;    // todo: switch between UART mode and other.
                           
-    CPU cpu_inst(.clk(cpu_clk),
+    CPU CPU_inst(.clk(CPU_clk),
                  .rst(rst),
+                 .en(CPU_en),
                  .instr_addr(instr_addr),
                  .instr(instr),
                  .mem_write(mem_write),
@@ -39,7 +45,7 @@ module top (
     wire is_in_data_seg;
     wire [31:0] data_addr;
     wire data_wea;
-    wire data_out;
+    wire [31:0] data_out;
     
     assign is_in_data_seg = (mem_addr >= 32'h7fff000 && mem_addr <= 32'h7fffeffc);
     assign data_addr = is_in_data_seg ? ($signed(mem_addr) - $signed(32'h1001_0000)) : 32'h00000000;
@@ -55,7 +61,7 @@ module top (
     wire is_in_stack_seg;
     wire [31:0] stack_addr;
     wire stack_wea;
-    wire stack_out;
+    wire [31:0] stack_out;
     
     assign is_in_stack_seg = (mem_addr >= 32'h7fff000 && mem_addr <= 32'h7fffeffc);
     assign stack_addr = is_in_stack_seg  ? (32'h7fffeffc - mem_addr) : 32'h00000000;
