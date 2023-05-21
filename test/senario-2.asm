@@ -1,10 +1,4 @@
 .data 
-    case_address: .word 0
-    data_address: .word 0
-    input_a: .word 0
-    input_b: .word 0
-    output: .word 0
-    sum: .word 0
     push_count: .word 0
     pop_count: .word 0
     stack_top: .word 0
@@ -19,9 +13,6 @@ main:
 
     # 0xC60($28) LED
     # 0xC9C($28) segtube
-    # led_base_addr = 0x10000000
-    # Hex7_base_addr = 0x10000010
-    # input_addr = 0x20000000
     lw $t0, 0xC78($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits    
 
@@ -67,7 +58,7 @@ sum_recursive:
     sw $ra, 4($sp) 
     sw $t2, 0($sp) 
     beq $t0, $zero, end_recursive 
-    addi $t2, $t2, $t0 
+    add $t2, $t2, $t0 
     addi $t4, $t4, 1 # the count of in_stack
     addi $t0, $t0, -1 
     jal sum_recursive 
@@ -141,8 +132,6 @@ loop_02:
     addi $t4, $t4, -1
     bne $t4, $zero, loop_02
     j loop_01
-end_loop:
-    j end_program
     
 sum_1: 
     addi $sp, $sp, -8 
