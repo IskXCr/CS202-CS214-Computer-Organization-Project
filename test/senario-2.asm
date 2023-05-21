@@ -13,10 +13,16 @@
 .global main
 
 main:
-    led_base_addr = 0x10000000
-    Hex7_base_addr = 0x10000010
-    input_addr = 0x20000000
-    lw $t0, case_address
+
+    lui $28, 0x1000
+    ori $28, $28, 0x0000
+
+    # 0xC60($28) LED
+    # 0xC9C($28) segtube
+    # led_base_addr = 0x10000000
+    # Hex7_base_addr = 0x10000010
+    # input_addr = 0x20000000
+    lw $t0, 0xC78($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits    
 
     beq $t0, 0, test_000
@@ -29,29 +35,28 @@ main:
     beq $t0, 7, test_111
 
 test_000:
-    lw $t0, input_a
+    lw $t0, 0xC70($28)
     li $t1, 1
     li $t2, 0
 loop:
     add $t2, $t2, $t1
     addi $t1, $t1, 1
     bne $t1, $t0, loop
-    sw $t2, output
-    sw $t2, led_base_addr
-    sw $t2, Hex7_base_addr
+    sw $t2, 0xC60($28)
+    sw $t2, 0xC9C($28)
     j end_program
 
 
 test_001:
-    lw $t0, input_addr
+    lw $t0, 0xC70($28)
     li $t2, 0
     li $t3, 0
     li $t4, 0
     jal sum
-    sw $t2, LEDR_BASE_ADDR 
-    sw $t2, HEX7_BASE_ADDR 
+    sw $t2, 0xC60($28)
+    sw $t2, 0xC9C($28)
     add $t3, $t4, $t5 
-    sw $t3, LEDR_BASE_ADDR
+    sw $t3, 0xC60($28)
     j end_program
 sum_recursive: 
     addi $sp, $sp, -8 
@@ -71,7 +76,7 @@ end_recursive:
     jr $ra
 
 test_010:
-    lw $t0, input_addr
+    lw $t0, 0xC70($28)
     jal sum
     la $t1, stack_top 
     lw $t2, stack_size
@@ -79,7 +84,7 @@ loop_1:
     beq $t2, $zero, end_loop
     addi $t1, $t1, -4 
     lw $t3, 0($t1)
-    sw $t3, led_base_addr
+    sw $t3, 0xC60($28)
     li $t4, 3
 loop_2:
     addi $t4, $t4, -1
@@ -114,7 +119,7 @@ sum:
     jr $ra 
 
 test_011:
-    lw $t0, input_addr
+    lw $t0, 0xC70($28)
     jal sum_1
     la $t1, stack_top 
     lw $t2, stack_size
@@ -122,7 +127,7 @@ loop_01:
     beq $t2, $zero, end_loop
     addi $t1, $t1, -4 
     lw $t3, 0($t1)
-    sw $t3, led_base_addr
+    sw $t3, 0xC60($28)
     li $t4, 3
 loop_02:
     addi $t4, $t4, -1
@@ -157,10 +162,10 @@ sum_1:
     jr $ra 
 
 test_100:
-    lw $t0, input_addr
-    lb $t2, 0($t0)
-    lw $t1, input_addr + 4
-    lb $t3, 0($t1)
+    lw $t0, 0xC70($28)
+    addi $t2, $t0, 0
+    lw $t1, 0xC70($28)
+    addi $t3, $t0, 0
     add $t4, $t2, $t3 # sum
 
     sltiu $t5, $t4, 256
@@ -170,16 +175,16 @@ test_100:
 no_carry:    
     li $t6, 0
 end_addition:
-    sw $t4, led_base_addr
-    sw $t6, led_base_addr + 4
+    sw $t4, 0xC60($28)
+    sw $t6, 0xC60($28)
 
     j end_program
 
 test_101:
-    lw $t0, input_addr 
-    lb $t2, 0($t0) 
-    lw $t1, input_addr + 4 
-    lb $t3, 0($t1)
+    lw $t0, 0xC70($28)
+    addi $t2, $t0, 0
+    lw $t1, 0xC70($28)
+    addi $t3, $t0, 0
     
     sub $t4, $t2, $t3
 
@@ -192,32 +197,32 @@ overflow:
 no_overflow:
     li $t5, 0
 end_subtraction:
-    sw $t4, led_base_addr
-    sw $t5, led_base_addr + 4
+    sw $t4, 0xC60($28)
+    sw $t5, 0xC60($28)
     j end_program
 
 test_110:
-    lw $t0, input_addr 
-    lb $t2, 0($t0) 
-    lw $t1, input_addr + 4 
-    lb $t3, 0($t1)
+    lw $t0, 0xC70($28)
+    addi $t2, $t0, 0
+    lw $t1, 0xC70($28)
+    addi $t3, $t0, 0
 
     mult $t2, $t3 
     mfhi $t4 
     mflo $t5
-    sw $t5, led_base_addr
+    sw $t5, 0xC60($28)
 
 test_111:
-    lw $t0, input_addr 
-    lb $t2, 0($t0) 
-    lw $t1, input_addr + 4 
-    lb $t3, 0($t1)
+    lw $t0, 0xC70($28)
+    addi $t2, $t0, 0
+    lw $t1, 0xC70($28)
+    addi $t3, $t0, 0
     div $t2, $t3 
     mfhi $t5 
     mflo $t4 
 
-    sw $t4, led_base_addr
-    sw $t5, led_base_addr + 4
+    sw $t4, 0xC60($28)
+    sw $t5, 0xC60($28)
 
 end_program:
     j end_program

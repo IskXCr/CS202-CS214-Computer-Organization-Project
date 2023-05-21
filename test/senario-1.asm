@@ -5,14 +5,14 @@
 
 main:
 
-    lui $28, 0xFFFF
-    ori $28, $28, 0xF000
+    lui $28, 0x1000 # base physical address
+    ori $28, $28, 0x0000
 
 loop_0:
-    lw $s7, 0xC72($28)
+    lw $s7, 0xC78($28)
     bne $s7, $zero, loop_0
 
-    lw $t0, 0xC72($28)
+    lw $t0, 0xC78($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits
 
     beq $t0, 0, test_000
@@ -25,7 +25,8 @@ loop_0:
     beq $t0, 7, test_111
 
 test_000:
-    la $t0, 0xC70($28)
+    lw $t0, 0xC70($28)
+    sw $t0, 0xC60($28)
     li $t2, 0
     li $t3, 0
     li $t4, 7
@@ -41,12 +42,12 @@ loop_7bit:
 
     addi $t6, $t2, 1
     xori $t6, $t6, 1
-    sw $t6, 0xC62($28)
+    sw $t6, 0xC68($28)
 
     j end_program
 
 test_001:
-    la $t0, 0xC70($28)
+    lw $t0, 0xC70($28)
     sw $t0, 0xC60($28)
     li $t2, 0
     li $t3, 0
@@ -62,7 +63,7 @@ loop_8bit:
     bne $t3, $t4, loop_8bit
 
     addi $t6, $t2, 1
-    sw $t6, 0xC62($28)
+    sw $t6, 0xC68($28)
     j end_program
 
 test_010:

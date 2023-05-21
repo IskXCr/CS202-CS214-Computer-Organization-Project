@@ -187,7 +187,7 @@ Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to g
 | 0x10000C8C |R|4 bytes|keyboard|get from keyboard|
 | 0x10000C68 |W| 4 bytes | LED |left 8 LED|
 | 0x10000C60 |W| 8 bytes | LED |right 16 LED|
-| 0x10000C9C |W| 4 bytes | segtube|segtube|
+| 0x10000C9C |W| 4 bytes | segtube|segtube |
 
 
 
