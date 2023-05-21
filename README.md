@@ -10,7 +10,9 @@ In this project, a single-cycle MIPS CPU has been designed and tested. The CPU s
 
 ### Overview
 
-![image-20230521182421715](markdown-img\spec1.png)
+![image-20230521182421715](markdown-img/spec1.png)
+
+**Architecture**: Harvard Architecture.
 
 
 
@@ -171,6 +173,8 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 | Text    | 0x00400000 | 16384 Words | Block Memory Generator |
 | Data    | 0x10010000 | 16384 Words | Block Memory Generator |
 | Stack   | 0x7fffeffc | 16384 Words | Block Memory Generator |
+
+Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to get the actual address inside the block memory.
 
 
 
