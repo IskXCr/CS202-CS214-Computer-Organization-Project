@@ -10,7 +10,7 @@ In this project, a single-cycle MIPS CPU has been designed and tested. The CPU s
 
 ### Overview
 
-![image-20230521182421715](markdown-img\spec1.png)
+![image-20230521182421715](markdown-img/spec1.png)
 
 **Architecture**: Harvard Architecture.
 
