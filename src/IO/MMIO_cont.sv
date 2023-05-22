@@ -13,7 +13,7 @@ module MMIO_cont(
     input  wire [23:0] switches,
     output wire [23:0] led,
     output wire [7:0]  tube_en,
-    output wire [15:0] tube_seg
+    output wire [7:0]  tube_seg
     // TODO: add other IO devices
     );
 
