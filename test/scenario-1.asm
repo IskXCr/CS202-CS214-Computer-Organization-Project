@@ -30,19 +30,18 @@ test_000:
     li $t2, 0
     li $t3, 0
     li $t4, 7
-    addi $t6, $t0, 0x7F
+    andi $t6, $t0, 0x7F
+    sw $t6, 0xC60($28)
 loop_7bit:
-    addi $t5, $t6, 1
+    andi $t5, $t6, 1
     srl $t6, $t6, 1
     add $t2, $t2, $t5
-    sb $t5, ($t0)
-    addi $t0, $t0, 1
     addi $t3, $t3, 1
     bne $t3, $t4, loop_7bit
 
-    addi $t6, $t2, 1
-    xori $t6, $t6, 1
-    sw $t6, 0xC68($28)
+    andi $t2, $t2, 1
+    xori $t2, $t2, 1
+    sw $t2, 0xC68($28)
 
     j end_program
 
@@ -54,15 +53,13 @@ test_001:
     li $t4, 8
     add $t6, $t0, $zero
 loop_8bit:    
-    addi $t5, $t6, 1
+    andi $t5, $t6, 1
     srl $t6, $t6, 1
     add $t2, $t2, $t5
-    sw $t5, ($t0)
-    addi $t0, $t0, 1
     addi $t3, $t3, 1
     bne $t3, $t4, loop_8bit
 
-    addi $t6, $t2, 1
+    andi $t6, $t2, 1
     sw $t6, 0xC68($28)
     j end_program
 
