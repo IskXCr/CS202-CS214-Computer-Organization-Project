@@ -23,23 +23,23 @@ module MMIO_cont(
     wire led_enable;
     wire switch_enable;
     wire tube_enable;
-    wire[15:0] switch_readdata;
+    wire [15:0] switch_readdata;
     wire [15:0] led_readdata;
     wire [15:0] tube_readdata;
     
-    assign io_enable = (wea && mode && addr >= 32'h10000C60 && addr <= 32'h10000D00);
+    assign io_enable = wea;
     assign led_enable = (io_enable && addr[7:4] == 4'h6);
     assign switch_enable = (io_enable && addr[7:4] == 4'h7);
     assign tube_enable = (io_enable && addr[7:4] == 4'h9);
 
-    switch_driver t1(.clk(clk),
+    switch_driver t1(.clk(cpu_clk),
                      .rst(rst),
                      .switch_enable(switch_enable),
                      .w_data(switches),
                      .switch_data(switch_readdata)
                      );
 
-    LED_driver t2(.clk(clk),
+    LED_driver t2(.clk(cpu_clk),
                   .rst(rst),
                   .in(led_enable),
                   .led_addr(addr[3:2]),
@@ -48,7 +48,7 @@ module MMIO_cont(
                   .readdata(led_readdata)
                   );
 
-    tube_driver t3(.clk(clk),
+    tube_driver t3(.clk(cpu_clk),
                    .rst(rst),
                    .in(write_data),
                    .tubeout(tube_seg),

@@ -1,34 +1,13 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2023/05/10 11:45:17
-// Design Name: 
-// Module Name: LED
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module LED_driver(
-
     clk, rst, in, led_addr, led_in, ledout, readdata
     );
     input clk;
     input rst;
     input in;
-	input[1:0] led_addr;
-	input[15:0] led_in;
+	input [1:0] led_addr;
+	input [15:0] led_in;
 	output reg[23:0] ledout;
 	output reg[15:0] readdata;
 

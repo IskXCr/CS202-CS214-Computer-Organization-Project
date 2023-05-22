@@ -17,12 +17,17 @@ if __name__ == "__main__":
     with open(new_file, "w") as f:
         f.write("memory_initialization_radix = 16;\n")
         f.write("memory_initialization_vector =\n")
-        cnt = 0
+        cnt = 1
         for line in lines:
-            cnt += 1
             if cnt > cmd_args.size:
                 break
             f.write(line.strip() + ",\n")
+            cnt += 1
+
+        if cnt < cmd_args.size:
+            for i in range(cmd_args.size - cnt):
+                f.write("00000000,\n")
+
 
     print(f'Src: "{file}"\nDst: "{new_file}"')
-    print(f'Transformed {len(lines)} lines.')
+    print(f'Transformed {cnt} lines.')

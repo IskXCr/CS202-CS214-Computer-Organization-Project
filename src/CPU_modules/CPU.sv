@@ -17,9 +17,6 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     output wire overflow
     );
 
-    wire instr_cont_en;
-    assign instr_cont_en = en;
-
     wire [31:0] pc4;
     wire instr_jump, instr_branch, jump_dst;
     wire cont_branch;
@@ -53,11 +50,17 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     assign overflow = ALU_overflow;
 
     wire mem_to_reg;
+
+    // cpu_en_ctrl
+    wire instr_ctrl_en, reg_ctrl_en, dmem_ctrl_en;
+    assign instr_ctrl_en = en;
+    assign reg_ctrl_en = en && rwe;
+    assign dmem_ctrl_en = en && dmem_we;
     
     // inst_cont
     instr_cont #(TEXT_BASE_ADDR) instr_controller(.clk(clk),
                                                   .rst(rst),
-                                                  .en(instr_cont_en),
+                                                  .en(instr_ctrl_en),
                                                   .pc4(pc4),
                                                   .instr_addr(instr_addr),
                                                   .instr(instr[25:0]),
@@ -124,7 +127,7 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
   
     reg_file registers(.clk(clk),
                        .rst(rst),
-                       .we(rwe),
+                       .we(reg_ctrl_en),
                        .ra1(instr[25:21]), 
                        .ra2(rraddr2),
                        .wa(rwaddr),
@@ -160,9 +163,9 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     // data memory
     wire [31:0] dmem_wdata, dmem_addr;
     assign dmem_wdata = rrdata2;
-    assign dmem_addr = {ALU_out[31:2], 2'b00};
+    assign dmem_addr = ALU_out;
 
-    assign mem_write = dmem_we;
+    assign mem_write = dmem_ctrl_en;
     assign mem_addr = dmem_addr;
     assign write_data = dmem_wdata;
 

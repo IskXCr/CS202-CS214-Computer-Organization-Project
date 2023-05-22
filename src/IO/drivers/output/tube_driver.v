@@ -1,24 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2023/05/10 11:45:17
-// Design Name: 
-// Module Name: tube
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module tube_driver(
     clk, rst, in, tubeout, tube_en
@@ -51,9 +31,10 @@ module tube_driver(
             tmp[15] = 8'b10001110;   //  F
 		end
 		else begin
-			cnt <= (cnt == 4'd8) ? (4'd9) : (cnt + 1);
+			cnt <= (cnt == 4'd8) ? (4'd0) : (cnt + 1);
 		end
-    end    
+    end
+
 	always @(posedge clk, posedge rst) begin
 		case (cnt)
 		4'd1:

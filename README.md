@@ -181,15 +181,15 @@ Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to g
 
 ### MMIO Specification
 
-*MMIO* configuration is tailored to meet requirements for CS214 Project Inspection.
+*MMIO* configuration is tailored to meet the requirements for CS214 Project Inspection.
 
-Pin constraint only works only on *Minisys*.
+Pin constraints only work only on *Minisys*.
 
 | Physical Segment Base | R/W Support | Size (Word) | Destination Device | Description |
 | --------------------- | ---------- | ---- | ------------------ | ----------- |
 | 0xffff_0000 | R/W         | 1 |  | Reserved |
 | 0xffff_0004 | R | 1 | SW[23] | `0` if scenario 1. `1` if scenario 2. |
-| 0xffff_0008 | R | 1 | SW[22:20] | Testcase sample. |
+| 0xffff_0008 | R | 1 | SW[22:20] | Testcase number, 3 bits. |
 | 0xffff_000C | R | 1 | SW[15:8] | Operand 1. Sign extension according to specific testcases. |
 | 0xffff_0010 | R | 1 | SW[7:0] | Operand 2. Sign extension according to specific testcases. |
 | 0xffff_0014 | R | 1 | Keypad | Keypad number. Maximum 1 word. |
@@ -202,14 +202,14 @@ Pin constraint only works only on *Minisys*.
 
 ### Other IO Devices
 
-Configuration of other IO devices is tailored to meet requirements for CS214 Project Inspection.
+Configuration of other IO devices is tailored to meet the requirements for CS214 Project Inspection.
 
 Pin constraints work on **Minisys** platform only.
 
-| Destination Device | Pin  | Description                                                  |
-| ------------------ | ---- | ------------------------------------------------------------ |
-| CPU Mode Indicator | L13  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
-|                    |      |                                                              |
+| Type (I/O) | Name               | Destination Device | Pin  | Description                                                  |
+| ---------- | ------------------ | ------------------ | ---- | ------------------------------------------------------------ |
+| I          | CPU Mode Indicator | LED                | L13  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
+|            |                    |                    |      |                                                              |
 
 
 
