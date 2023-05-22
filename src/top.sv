@@ -3,6 +3,7 @@
 module top (
     input  wire clk,
     input  wire rst,
+    input  wire mode_switch,     // switch between UART comm mode and CPU load mode
 
     input  wire [4:0]  buttons,
     input  wire [23:0] switches,
@@ -12,30 +13,53 @@ module top (
     // TODO: add other IO devices
     );
 
+    // debounce for rst
+    reg rst_ctrl;  // real rst signal
+    reg [1:0] cnt;
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            rst_ctrl <= 1'b1;
+            cnt <= 2'b00;
+        end
+        else begin
+            if (cnt == 2'b11) begin
+                cnt <= 2'b00;
+                rst_ctrl <= 1'b0;
+            end
+            else begin
+                cnt <= cnt + 2'b01;
+            end
+        end
+    end
+
+
+    // clk_ctrl
     wire cpu_clk;
-    wire cpu_en;
-    
-    wire uart_clk;
-    
-    wire mem_write;
-    wire [31:0] instr_addr, instr, mem_addr, write_data;
-    reg  [31:0] read_data;
-    
+    reg cpu_en;
+    reg cpu_rst;
+
     clk_wiz_0 clk_gen(.clk_in1(clk),
                       .clk_out1(cpu_clk),
                       .clk_out2(uart_clk));
 //    assign CPU_clk = clk;
     assign CPU_en = 1;    // todo: switch between UART mode and other.
-                          
+
+    wire overflow;
+
+    wire mem_write;
+    wire [31:0] instr_addr, instr, mem_addr, write_data;
+    reg  [31:0] read_data;
+    
     CPU CPU_inst(.clk(CPU_clk),
-                 .rst(rst),
+                 .rst(rst_ctrl),
                  .en(CPU_en),
                  .instr_addr(instr_addr),
                  .instr(instr),
                  .mem_write(mem_write),
                  .mem_addr(mem_addr),
                  .write_data(write_data),
-                 .read_data(read_data));
+                 .read_data(read_data),
+                 .overflow(overflow));
     
 
     // set instruction memory
@@ -56,17 +80,19 @@ module top (
     wire MMIO_wea;
     wire [31:0] MMIO_out;
 
-    assign is_in_MMIO_seg = (mem_addr >= 32'h1000_0000 && mem_addr <= 32'h1000_0200);
+    assign is_in_MMIO_seg = (mem_addr >= 32'hffff_0000 && mem_addr <= 32'hffff_0080);
     assign MMIO_addr = is_in_MMIO_seg ? (mem_addr - 32'h1000_0000) : 32'h0000_0000; // map to address starting at 0x0
     assign MMIO_wea = is_in_MMIO_seg && mem_write;
 
     // setup IO connections
     MMIO_cont MMIO_controller(.clk(~cpu_clk),
-                              .rst(rst),
+                              .rst(rst_ctrl),
                               .addr(MMIO_addr),
                               .write_data(write_data),
                               .read_data(MMIO_out),
                               .wea(MMIO_wea),
+                              .mode(mode),
+                              .overflow(overflow),
                               .buttons(buttons),
                               .switches(switches),
                               .led(led),
