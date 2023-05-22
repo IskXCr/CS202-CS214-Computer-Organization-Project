@@ -20,9 +20,9 @@ module switch_driver(
         end
         else if (switch_enable) begin
             if (switch_addr == 2'b00)
-            switch_data[15:0] <= wdata[15:0];
+                switch_data[15:0] <= wdata[15:0];
             else if (switch_addr == 2'b10)
-            switch_data[15:0] <= {8'h00, wdata[23:16]};
+                switch_data[15:0] <= {8'h00, wdata[23:16]};
             else
                 switch_data <= switch_data;
         end

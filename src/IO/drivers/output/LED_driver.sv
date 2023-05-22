@@ -16,30 +16,27 @@ module LED_driver(
 			ledout <= 24'h0;
 			readdata <= 24'h0;
 		end
-		
-	else if (in) begin
-		if (led_addr == 2'b00)
-		begin
-		  ledout[23] = led_in[0];
-		  readdata[15:0] <= {15'h0, led_in[0]};
-		end
-		else if (led_addr == 2'b01)
-		begin
-			ledout[15:0] <= led_in[15:0];
-			readdata[15:0] <= led_in[15:0];
-		end
-		else if (led_addr == 2'b10) begin
-			ledout[23:16] <= led_in[7:0];
-			readdata[15:0] <= {8'h0, led_in[7:0]};
+		else if (in) begin
+			if (led_addr == 2'b00) begin
+				ledout[23] = led_in[0];
+				readdata[15:0] <= {15'h0, led_in[0]};
+			end
+			else if (led_addr == 2'b01) begin
+				ledout[15:0] <= led_in[15:0];
+				readdata[15:0] <= led_in[15:0];
+			end
+			else if (led_addr == 2'b10) begin
+				ledout[23:16] <= led_in[7:0];
+				readdata[15:0] <= {8'h0, led_in[7:0]};
+			end
+			else begin
+				ledout <= led_in;
+				readdata[15:0] <= 16'h0;
+			end
+				
 		end
 		else begin
-			ledout <= led_in;
-			readdata[15:0] <= 16'h0;
+			ledout <= ledout;
 		end
-			
-	end
-	else begin
-		ledout <= ledout;
-	end
 	end
 endmodule
