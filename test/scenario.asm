@@ -1,0 +1,347 @@
+.data 
+
+.text
+.global main
+
+main:
+    
+    lui $28, 0xffff # base physical address
+    ori $28, $28, 0x0000
+    lw $s6, 0x4($28)
+    beq $s6, 1, case2
+
+case1:
+loop_0:
+    lw $s7, 0x08($28)
+    bne $s7, $zero, loop_0
+
+    lw $t0, 0x08($28)
+    andi $t0, $t0, 0x07 # get the lower 3 bits
+
+    beq $t0, 0, test1_000
+    beq $t0, 1, test1_001
+    beq $t0, 2, test1_010
+    beq $t0, 3, test1_011    
+    beq $t0, 4, test1_100
+    beq $t0, 5, test1_101
+    beq $t0, 6, test1_110
+    beq $t0, 7, test1_111
+
+test1_000:
+    lw $t0, 0x0C($28)
+    sw $t0, 0x24($28)
+    li $t2, 0
+    li $t3, 0
+    li $t4, 7
+    andi $t6, $t0, 0x7F
+    sw $t6, 0x2C($28)
+loop_7bit:
+    andi $t5, $t6, 1
+    srl $t6, $t6, 1
+    add $t2, $t2, $t5
+    addi $t3, $t3, 1
+    bne $t3, $t4, loop_7bit
+
+    andi $t2, $t2, 1
+    xori $t2, $t2, 1
+    sw $t2, 0x20($28)
+
+    j end_program
+
+test1_001:
+    lw $t0, 0x0C($28)
+    sw $t0, 0x24($28)
+    li $t2, 0
+    li $t3, 0
+    li $t4, 8
+    add $t6, $t0, $zero
+    sw $t6, 0x2C($28)
+loop_8bit:    
+    andi $t5, $t6, 1
+    srl $t6, $t6, 1
+    add $t2, $t2, $t5
+    addi $t3, $t3, 1
+    bne $t3, $t4, loop_8bit
+
+    andi $t6, $t2, 1
+    sw $t2, 0x20($28)
+    j end_program
+
+test1_010:
+    jal test_111
+    or $t3, $t1, $t2
+    not $t3, $t3
+    sw $t3, 0x24($28)
+    sw $t3, 0x2C($28)
+    j end_program
+
+test1_011:
+    jal test_111
+    or $t3, $t1, $t2
+    sw $t3, 0x24($28)
+    sw $t3, 0x2C($28)
+    j end_program
+
+test1_100:
+    jal test_111
+    xor $t3, $t1, $t2
+    sw $t3, 0x24($28)
+    sw $t3, 0x2C($28)
+    j end_program
+
+test1_101:
+    jal test_111
+    sltu $t3, $t1, $t2
+    sw $t3, 0x20($28)
+    j end_program
+
+test1_110:
+    jal test_111
+    slt $t3, $t1, $t2
+    sw $t3, 0x20($28)
+    j end_program
+
+test1_111:
+    lw $v0, 0x0C($28)
+    sw $v0, 0x24($28)
+    addi $t1, $v0, 0
+    lw $v0, 0x0C($28)
+    sw $v0, 0x28($28)
+    addi $t2, $v0, 0
+    jr $ra
+
+
+
+case2:
+    lw $t0, 0x08($28)
+    andi $t0, $t0, 0x07 # get the lower 3 bits    
+
+    beq $t0, 0, test_000
+    beq $t0, 1, test_001
+    beq $t0, 2, test_010
+    beq $t0, 3, test_011
+    beq $t0, 4, test_100
+    beq $t0, 5, test_101
+    beq $t0, 6, test_110
+    beq $t0, 7, test_111
+
+test_000:
+    lw $t0, 0x0C($28)
+    li $t1, 0
+    li $t2, 0
+    # if the input is negative
+    bgez $t0, loop
+loop_light:    
+    li $t2, 1
+    sw $t2, 0xC60($28)
+    li $t2, 0
+    sw $t2, 0xC60($28)
+    j loop_light
+    # j end_program
+loop:
+    addi $t1, $t1, 1
+    add $t2, $t2, $t1
+    bne $t1, $t0, loop
+    sw $t2, 0x2C($28) # LED output
+    sw $t2, 0x24($28) # seg output
+    
+
+    j end_program
+
+
+test_001:
+    lw $t0, 0x0C($28) # value of a 
+    li $t2, 0
+    li $t3, 0
+    li $t4, 0
+    jal sum
+    sw $t2, 0x2C($28) # the sum
+    sw $t2, 0x24($28)
+    add $t3, $t4, $t5 # the total number of the times
+    sw $t3, 0x2C($28) 
+    sw $t3, 0x24($28)
+    j end_program
+sum_recursive: 
+    addi $sp, $sp, -8 
+    sw $ra, 4($sp) 
+    sw $t2, 0($sp) 
+    beq $t0, $zero, end_recursive 
+    add $t2, $t2, $t0 
+    addi $t4, $t4, 1 # the count of in_stack
+    addi $t0, $t0, -1 
+    jal sum_recursive 
+    addi $t5, $t5, 1  # the count of out_stack
+    lw $t2, 0($sp) 
+    lw $ra, 4($sp) 
+    addi $sp, $sp, 8 
+    jr $ra 
+end_recursive: 
+    jr $ra
+
+
+test_010:
+    lw $t0, 0x0C($28)
+    addi $a0, $t0, 0
+    jal sum
+    la $t1, stack_top 
+    lw $t2, stack_size
+loop_1:
+    beq $t2, $zero, end_loop
+    addi $t1, $t1, -4 
+    lw $t3, 0($t1)
+    sw $t3, 0x2C($28) 
+    sw $t3, 0x24($28)
+    li $t4, 3
+loop_2:
+    addi $t4, $t4, -1
+    bne $t4, $zero, loop_2
+    j loop_1
+end_loop:
+    j end_program
+    
+sum: 
+    addi $sp, $sp, -8 
+    sw $ra, 4($sp) 
+    sw $a0, 0($sp) 
+    sw $a1, 8($sp) 
+    beq $a0, $zero, end_recursive 
+    addi $a1, $a1, 1 
+    add $t0, $a0, -1 
+    sw $t0, 0($sp) 
+    addi $t1, $t1, -4 
+    sw $a0, 0($t1) 
+    addi $t2, $t2, 1 
+    sw $t2, stack_size 
+    jal sum 
+    lw $a1, 8($sp) 
+    lw $a0, 0($sp) 
+    addi $t1, $t1, 4 
+    lw $t0, 0($t1) 
+    add $a0, $t0, $a0 
+    addi $t2, $t2, -1 
+    lw $t2, stack_size 
+    lw $ra, 4($sp) 
+    addi $sp, $sp, 8 
+    jr $ra 
+
+
+test_011:
+    lw $t0, 0x0C($28)
+    addi $a0, $t0, 0
+    jal sum_1
+    la $t1, stack_top 
+    lw $t2, stack_size
+loop_01:
+    beq $t2, $zero, end_loop
+    addi $t1, $t1, -4 
+    lw $t3, 0($t1)
+    sw $t3, 0x2C($28) 
+    sw $t3, 0x24($28)
+    li $t4, 3
+loop_02:
+    addi $t4, $t4, -1
+    bne $t4, $zero, loop_02
+    j loop_01
+    
+sum_1: 
+    addi $sp, $sp, -8 
+    sw $ra, 4($sp) 
+    sw $a0, 0($sp) 
+    sw $a1, 8($sp) 
+    beq $a0, $zero, end_recursive 
+    addi $a1, $a1, 1 
+    add $t0, $a0, -1 
+    sw $t0, 0($sp) 
+    addi $t1, $t1, -4 
+    addi $t2, $t2, 1 
+    sw $t2, stack_size 
+    jal sum_1 
+    lw $a1, 8($sp) 
+    lw $a0, 0($sp) 
+    sw $a0, 0($t1) 
+    addi $t1, $t1, 4 
+    lw $t0, 0($t1) 
+    add $a0, $t0, $a0 
+    addi $t2, $t2, -1 
+    lw $t2, stack_size 
+    lw $ra, 4($sp) 
+    addi $sp, $sp, 8 
+    jr $ra 
+
+
+test_100:
+    lw $t0, 0x0C($28)
+    addi $t2, $t0, 0
+    lw $t1, 0x0C($28)
+    addi $t3, $t0, 0
+    add $t4, $t2, $t3 # sum
+
+    sltiu $t5, $t4, 256
+    beq $t5, $zero, no_carry
+    li $t6, 1 # carry
+    j end_addition
+no_carry:    
+    li $t6, 0
+end_addition:
+    sw $t4, 0x24($28)
+    sw $t4, 0x2C($28)
+    sw $t6, 0x20($28)
+
+    j end_program
+
+test_101:
+    lw $t0, 0x0C($28)
+    addi $t2, $t0, 0
+    lw $t1, 0x0C($28)
+    addi $t3, $t0, 0
+    
+    sub $t4, $t2, $t3
+
+    bltz $t4, overflow
+    bgez $t4, no_overflow
+
+overflow:
+    li $t5, 1
+    j end_subtraction
+no_overflow:
+    li $t5, 0
+end_subtraction:
+    sw $t4, 0x24($28)
+    sw $t4, 0x2C($28)
+    sw $t5, 0x20($28)
+    j end_program
+
+test_110:
+    lw $t0, 0x0C($28)
+    addi $t2, $t0, 0
+    lw $t1, 0x0C($28)
+    addi $t3, $t0, 0
+
+    mult $t2, $t3 
+    mfhi $t4 
+    mflo $t5
+    sw $t5, 0x24($28)
+    sw $t5, 0x2C($28)
+
+test_111:
+    lw $t0, 0x0C($28)
+    addi $t2, $t0, 0
+    lw $t1, 0x0C($28)
+    addi $t3, $t0, 0
+    div $t2, $t3 
+    mfhi $t5 
+    mflo $t4 
+
+loop_show:
+    sw $t4, 0x24($28)
+    sw $t4, 0x2C($28)
+    li $t6, 5
+loop_delay:
+    subi $t5, $t5, 1
+    neq $t5, $zero, loop_delay
+    sw $t5, 0x24($28)
+    sw $t5, 0x2C($28)
+    j loop_show
+
+end_program:
+    j end_program
