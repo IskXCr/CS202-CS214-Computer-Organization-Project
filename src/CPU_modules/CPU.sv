@@ -12,8 +12,9 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     output wire mem_write,
     output wire [31:0] mem_addr,
     output wire [31:0] write_data,
-    input  wire [31:0] read_data
+    input  wire [31:0] read_data,
 
+    output wire overflow
     );
 
     wire instr_cont_en;
@@ -48,7 +49,8 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     wire [4:0] shamt;
     wire shift_src, shift_dir, shift_ari, do_unsigned;
 
-    wire ALU_lt, ALU_eq, overflow;
+    wire ALU_lt, ALU_eq, ALU_overflow;
+    assign overflow = ALU_overflow;
 
     wire mem_to_reg;
     
@@ -152,7 +154,7 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
                  .op_2(ALU_op2),
                  .ALU_eq(ALU_eq),
                  .ALU_lt(ALU_lt),
-                 .overflow(overflow),
+                 .overflow(ALU_overflow),
                  .ALU_out(ALU_out));
 
     // data memory

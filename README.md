@@ -168,11 +168,12 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 ### Memory Specification
 
-| Segment | Offset     | Size        | Source                 |
-| ------- | ---------- | ----------- | ---------------------- |
-| Text    | 0x00400000 | 16384 Words | Block Memory Generator |
-| Data    | 0x10010000 | 16384 Words | Block Memory Generator |
-| Stack   | 0x7fffeffc | 16384 Words | Block Memory Generator |
+| Segment | Offset      | Boundary    | Size        | Source                 |
+| ------- | ----------- | ----------- | ----------- | ---------------------- |
+| Text    | 0x0040_0000 | 0x0040_4000 | 16384 Words | Block Memory Generator |
+| Data    | 0x1001_0000 | 0x1001_4000 | 16384 Words | Block Memory Generator |
+| Stack   | 0x7fff_effc | 0x7fff_affc | 16384 Words | Block Memory Generator |
+| MMIO    | 0xffff_0000 | 0xffff_0080 | 32 Words    | Memory-Mapped IO       |
 
 Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to get the actual address inside the block memory.
 
@@ -180,14 +181,35 @@ Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to g
 
 ### MMIO Specification
 
-| Physical Segment Base | W/R Support | Size | Destination Device | Description |
+*MMIO* configuration is tailored to meet requirements for CS214 Project Inspection.
+
+Pin constraint only works only on *Minisys*.
+
+| Physical Segment Base | R/W Support | Size (Word) | Destination Device | Description |
 | --------------------- | ---------- | ---- | ------------------ | ----------- |
-| 0x10000C78 |R| 4 bytes | X2-X0 Switch| left 8 switch|
-| 0x10000C70 |R| 8 bytes | sw7 - sw0 Switch | right 16 switch|
-| 0x10000C8C |R|4 bytes|keyboard|get from keyboard|
-| 0x10000C68 |W| 4 bytes | LED |left 8 LED|
-| 0x10000C60 |W| 8 bytes | LED |right 16 LED|
-| 0x10000C9C |W| 4 bytes | segtube|segtube |
+| 0xffff_0000 | R/W         | 1 |  | Reserved |
+| 0xffff_0004 | R | 1 | SW[23] | `0` if scenario 1. `1` if scenario 2. |
+| 0xffff_0008 | R | 1 | SW[22:20] | Testcase sample. |
+| 0xffff_000C | R | 1 | SW[15:8] | Operand 1. Sign extension according to specific testcases. |
+| 0xffff_0010 | R | 1 | SW[7:0] | Operand 2. Sign extension according to specific testcases. |
+| 0xffff_0014 | R | 1 | Keypad | Keypad number. Maximum 1 word. |
+| 0xffff_0020 | R/W | 1 | LED@K17 | Single LED indicator.                                      |
+| 0xffff_0024 | R/W | 1 | LED Tube LEFT | 7-seg tube output in hex.                                  |
+| 0xffff_0028 | R/W | 1 | LED Tube RIGHT | 7-seg tube output in hex.                                  |
+| 0xffff_002C | R/W | 1 | LED[15:0] | 16 bit LED output.                                         |
+
+
+
+### Other IO Devices
+
+Configuration of other IO devices is tailored to meet requirements for CS214 Project Inspection.
+
+Pin constraints work on **Minisys** platform only.
+
+| Destination Device | Pin  | Description                                                  |
+| ------------------ | ---- | ------------------------------------------------------------ |
+| CPU Mode Indicator | L13  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
+|                    |      |                                                              |
 
 
 

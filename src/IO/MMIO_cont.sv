@@ -9,6 +9,8 @@ module MMIO_cont(
     output wire [31:0] read_data, // for addr, return the data read on next posedge of this clk
     input  wire wea,
 
+    input  wire mode,
+    input  wire overflow,
     input  wire [4:0]  buttons,
     input  wire [23:0] switches,
     output wire [23:0] led,
