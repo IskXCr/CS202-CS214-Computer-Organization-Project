@@ -73,8 +73,19 @@ module top (
     assign uart_write_addr = 32'b0000_0000;
     assign uart_write_target = 32'b0000_0000;
     // assign uart
+    wire uart_write_clk;
+    wire uart_wen;
+    wire uart_done;
 
-    // uart_bmpg_0 uart_controller();
+    uart_bmpg_0 uart_controller(.upg_clk_i(uart_clk),
+                                .upg_rst_i(rst_ctrl),
+                                .upg_clk_o(uart_clk),
+                                .upg_wen_o(uart_wen),
+                                .upg_adr_o({uart_write_target, uart_write_addr}),
+                                .upg_dat_o(uart_write_data),
+                                .upg_done_o(uart_done),
+                                .upg_rx_i(upg_rx_i),
+                                .upg_tx_o(upg_tx_o));
 
 
     // set CPU
@@ -102,15 +113,18 @@ module top (
     
 
     // set instruction memory
+    wire instr_clk;
     wire [31:0] true_instr_addr;
     wire [31:0] instr_write_data;
     wire instr_wea;
     
+    assign instr_clk = (~mode_ctrl & ~uart_write_clk) | (mode_ctrl & ~cpu_clk);
     assign true_instr_addr = mode_ctrl ? (cpu_instr_addr - 32'h0040_0000) : uart_write_addr;
     assign instr_write_data = uart_write_data;
-    assign instr_wea = (~mode_ctrl & ~uart_write_target);
+    assign instr_wea = (~mode_ctrl & ~uart_write_target & uart_wen);
+    
                  
-    instr_mem instr_memory(.clka(cpu_clk),
+    instr_mem instr_memory(.clka(instr_clk),
                            .addra(true_instr_addr[15:2]),
                            .dina(instr_write_data),
                            .douta(cpu_instr),
@@ -118,16 +132,18 @@ module top (
 
     
     // set data memory
+    wire data_clk;
     wire is_in_data_seg;
     wire [31:0] data_addr;
     wire [31:0] data_out;
     wire data_wea;
     
+    assign data_clk = (~mode_ctrl & ~uart_write_clk) | (mode_ctrl & ~cpu_clk);
     assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h7000_0000);
     assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : uart_write_addr ; // map to address starting at 0x0
-    assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : uart_write_target;
+    assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target & uart_wen);
     
-    data_mem data_memory(.clka(~cpu_clk),
+    data_mem data_memory(.clka(data_clk),
                          .addra(data_addr[15:2]),
                          .dina(cpu_write_data),
                          .douta(data_out),

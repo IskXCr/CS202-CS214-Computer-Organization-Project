@@ -13,7 +13,7 @@ module switch_driver(
     input [1:0] switch_addr;
     input [23:0] wdata;      //24 bit on board
     output reg [15:0] switch_data;
-    
+
     always @(posedge clk, posedge rst) begin
         if (rst) begin
             switch_data <= 24'h0;
@@ -26,7 +26,8 @@ module switch_driver(
             else
                 switch_data <= switch_data;
         end
-        else
-        switch_data <= switch_data;
+        else begin
+            switch_data <= switch_data;
+        end
     end
 endmodule

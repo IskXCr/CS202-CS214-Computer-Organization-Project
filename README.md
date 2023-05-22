@@ -209,10 +209,13 @@ Pin constraints work on **Minisys** platform only.
 | Type (I/O) | Name                  | VarName        | Destination Device | Pin  | Description                                                  |
 | ---------- | --------------------- | -------------- | ------------------ | ---- | ------------------------------------------------------------ |
 | O          | CPU Mode Indicator    |                | LED                | L13  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
-| I          | CPU UART Mode Trigger | `uart_trigger` | Button             |      | If pressed, CPU switches to UART communication mode.         |
-| I          | CPU Work Mode Trigger | `work_trigger` | Button             |      | If pressed, CPU switches to work mode                        |
-| I          | Reset                 | `rst`          | Button             |      | If pressed, initial an entire reset that sets CPU to UART comm mode, and resets PC and GPRs to their initial values. |
+| I          | CPU UART Mode Trigger | `uart_trigger` | Button             | TBD  | If pressed, CPU switches to UART communication mode.         |
+| I          | CPU Work Mode Trigger | `work_trigger` | Button             | TBD  | If pressed, CPU switches to work mode                        |
+| I          | Reset                 | `rst`          | Button             | TBD  | If pressed, initial an entire reset that sets CPU to UART comm mode, and resets PC and GPRs to their initial values. |
 | I          | Clock Signal          | `clk`          | Wire               | Y18  | **Minisys** *built-in clock signal*.                         |
+| I          | UART_RX               | `uart_rx_i`    | Wire               | Y19  | UART input                                                   |
+| O          | UART_TX               | `uart_tx_o`    | wire               | V18  | UART output                                                  |
+| O          | UART_DONE             |                | LED                | TBD  | UART transmission done indicator.                            |
 
 
 
