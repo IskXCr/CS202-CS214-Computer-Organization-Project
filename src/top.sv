@@ -35,6 +35,7 @@ module top (
 
     // clk_ctrl
     wire cpu_clk;
+    wire uart_clk;
     reg cpu_en;
     reg cpu_rst;
 

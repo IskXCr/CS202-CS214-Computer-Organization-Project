@@ -21,7 +21,6 @@
 
 
 module tube_driver(
-
     clk, rst, in, tubeout, tube_en
     );
     input clk;
