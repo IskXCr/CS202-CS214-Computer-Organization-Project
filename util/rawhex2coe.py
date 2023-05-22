@@ -21,11 +21,14 @@ if __name__ == "__main__":
         for line in lines:
             if cnt > cmd_args.size:
                 break
-            f.write(line.strip() + ",\n")
+            res = line.strip()
+            if len(res) == 0:
+                continue
+            f.write(res + ",\n")
             cnt += 1
 
         if cnt < cmd_args.size:
-            for i in range(cmd_args.size - cnt):
+            for i in range(cmd_args.size - cnt + 1):
                 f.write("00000000,\n")
 
 
