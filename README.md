@@ -206,10 +206,13 @@ Configuration of other IO devices is tailored to meet the requirements for CS214
 
 Pin constraints work on **Minisys** platform only.
 
-| Type (I/O) | Name               | Destination Device | Pin  | Description                                                  |
-| ---------- | ------------------ | ------------------ | ---- | ------------------------------------------------------------ |
-| I          | CPU Mode Indicator | LED                | L13  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
-|            |                    |                    |      |                                                              |
+| Type (I/O) | Name                  | VarName        | Destination Device | Pin  | Description                                                  |
+| ---------- | --------------------- | -------------- | ------------------ | ---- | ------------------------------------------------------------ |
+| O          | CPU Mode Indicator    |                | LED                | L13  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
+| I          | CPU UART Mode Trigger | `uart_trigger` | Button             |      | If pressed, CPU switches to UART communication mode.         |
+| I          | CPU Work Mode Trigger | `work_trigger` | Button             |      | If pressed, CPU switches to work mode                        |
+| I          | Reset                 | `rst`          | Button             |      | If pressed, initial an entire reset that sets CPU to UART comm mode, and resets PC and GPRs to their initial values. |
+| I          | Clock Signal          | `clk`          | Wire               | Y18  | **Minisys** *built-in clock signal*.                         |
 
 
 

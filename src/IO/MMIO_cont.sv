@@ -55,6 +55,6 @@ module MMIO_cont(
                    .tube_en(tube_en));
 
     assign read_data = (switch_enable == 1) ? 
-    {16'h0000,switch_readdata} : ((led_enable == 1) ? {16'h0000,led_readdata} : write_data[31:0]);
+                       {16'h0000,switch_readdata} : ((led_enable == 1) ? {16'h0000,led_readdata} : write_data[31:0]);
 
 endmodule
