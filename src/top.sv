@@ -86,7 +86,8 @@ module top (
     assign MMIO_wea = is_in_MMIO_seg && mem_write;
 
     // setup IO connections
-    MMIO_cont MMIO_controller(.clk(~cpu_clk),
+    MMIO_cont MMIO_controller(.cpu_clk(~cpu_clk),
+                              .dri_clk(clk),
                               .rst(rst_ctrl),
                               .addr(MMIO_addr),
                               .write_data(write_data),

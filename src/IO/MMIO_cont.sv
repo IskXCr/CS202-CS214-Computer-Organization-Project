@@ -1,8 +1,9 @@
 `timescale 1ns/1ps
 
 module MMIO_cont(
-    input  wire clk,  // write data on posedge of this clk
-    input  wire rst,  // clear writable memory
+    input  wire cpu_clk,  // write data on posedge of this clk
+    input  wire dri_clk,  // 100 MHz clk onboard.
+    input  wire rst,      // clear writable memory
 
     input  wire [31:0] addr,
     input  wire [31:0] write_data,
@@ -31,14 +32,14 @@ module MMIO_cont(
     assign switch_enable = (io_enable && addr[7:4] == 4'h7);
     assign tube_enable = (io_enable && addr[7:4] == 4'h9);
 
-    switch_driver t1(.clk(~clk),
+    switch_driver t1(.clk(clk),
                      .rst(rst),
                      .switch_enable(switch_enable),
                      .w_data(switches),
                      .switch_data(switch_readdata)
                      );
 
-    LED_driver t2(.clk(~clk),
+    LED_driver t2(.clk(clk),
                   .rst(rst),
                   .in(led_enable),
                   .led_addr(addr[3:2]),
@@ -47,7 +48,7 @@ module MMIO_cont(
                   .readdata(led_readdata)
                   );
 
-    tube_driver t3(.clk(~clk),
+    tube_driver t3(.clk(clk),
                    .rst(rst),
                    .in(write_data),
                    .tubeout(tube_seg),
