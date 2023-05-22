@@ -31,7 +31,7 @@ module tube_driver(
             tmp[15] = 8'b10001110;   //  F
 		end
 		else begin
-			cnt <= (cnt == 4'd8) ? (4'd0) : (cnt + 1);
+			cnt <= (cnt == 4'd8) ? (4'd1) : (cnt + 1);
 		end
     end
 
