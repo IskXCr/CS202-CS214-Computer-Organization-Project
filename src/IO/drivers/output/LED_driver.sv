@@ -20,6 +20,11 @@ module LED_driver(
 	else if (in) begin
 		if (led_addr == 2'b00)
 		begin
+		  ledout[23] = led_in[0];
+		  readdata[15:0] <= {15'h0, led_in[0]};
+		end
+		else if (led_addr == 2'b01)
+		begin
 			ledout[15:0] <= led_in[15:0];
 			readdata[15:0] <= led_in[15:0];
 		end
