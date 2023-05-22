@@ -8,44 +8,25 @@
 
 main:
 
-    lui $28, 0x1000
-    ori $28, $28, 0x0000
-
-    # 0xC60($28) LED
-    # 0xC9C($28) segtube
-    lw $t0, 0xC78($28)
-    andi $t0, $t0, 0x07 # get the lower 3 bits    
-
-    beq $t0, 0, test_000
-    beq $t0, 1, test_001
-    beq $t0, 2, test_010
-    beq $t0, 3, test_011
-    beq $t0, 4, test_100
-    beq $t0, 5, test_101
-    beq $t0, 6, test_110
-    beq $t0, 7, test_111
-
 test_000:
-    lw $t0, 0xC70($28)
+    li $t0, 43
+    # t0 should be 43
+
     li $t1, 0
     li $t2, 0
-    # if the input is negative
     bgez $t0, loop
+    # negative
 loop_light:    
     li $t2, 1
-    sw $t2, 0xC60($28)
+    # sw $t2, 0xC60($28)
     li $t2, 0
-    sw $t2, 0xC60($28)
+    # sw $t2, 0xC60($28)
     j loop_light
-    # j end_program
 loop:
     addi $t1, $t1, 1
     add $t2, $t2, $t1
     bne $t1, $t0, loop
-    sw $t2, 0xC60($28) # LED output
-    sw $t2, 0xC9C($28) # seg output
-    
-
+    # t1 should be 946
     j end_program
 
 
