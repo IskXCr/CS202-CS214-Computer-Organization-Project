@@ -2,9 +2,6 @@
 
 module top (
     input  wire clk,
-    input  wire rst,
-    input  wire uart_trigger,
-    input  wire work_trigger,
 
     input  wire upg_rx_i,
     output wire upg_tx_o,
@@ -17,6 +14,8 @@ module top (
     // TODO: add other IO devices
     );
 
+    wire rst;
+    assign rst = buttons[4];
 
     // rst_ctrl, debounce
     reg rst_ctrl;  // real rst signal
@@ -40,10 +39,19 @@ module top (
 
     // mode_ctrl
     // uart_trigger and work_trigger
+    wire uart_trigger, work_trigger; // if pressed, switch to corresponding mode
+    assign uart_trigger = buttons[3];
+    assign work_trigger = buttons[2];
+
     reg mode_ctrl; // 1 if WORK mode
+
+//    initial begin
+//        mode_ctrl <= 1'b1;
+//    end
+
     always_ff @(posedge clk, posedge rst) begin
         if (rst) begin
-            mode_ctrl <= 1'b0;
+            mode_ctrl <= 1'b1;
         end
         else begin
             if (work_trigger)
@@ -61,17 +69,18 @@ module top (
     wire uart_clk;
 
     clk_wiz_0 clk_gen(.clk_in1(clk),
+                      .reset(1'b0),
                       .clk_out1(cpu_clk),
                       .clk_out2(uart_clk));
+
+//    assign cpu_clk = clk;
+//    assign uart_clk = clk;
 
 
     // setup UART
     wire [13:0] uart_write_addr;
     wire [31:0] uart_write_data;
     wire uart_write_target;      // 0 for instruction, 1 for memory
-    // TODO: change this
-    assign uart_write_addr = 32'b0000_0000;
-    assign uart_write_target = 32'b0000_0000;
     // assign uart
     wire uart_write_clk;
     wire uart_wen;
@@ -79,7 +88,7 @@ module top (
 
     uart_bmpg_0 uart_controller(.upg_clk_i(uart_clk),
                                 .upg_rst_i(rst_ctrl),
-                                .upg_clk_o(uart_clk),
+                                .upg_clk_o(uart_write_clk),
                                 .upg_wen_o(uart_wen),
                                 .upg_adr_o({uart_write_target, uart_write_addr}),
                                 .upg_dat_o(uart_write_data),
@@ -102,7 +111,7 @@ module top (
     
     CPU CPU_inst(.clk(cpu_clk),
                  .rst(rst_ctrl),
-                 .en(CPU_en),
+                 .en(cpu_en),
                  .instr_addr(cpu_instr_addr),
                  .instr(cpu_instr),
                  .mem_write(cpu_mem_write),
@@ -118,7 +127,7 @@ module top (
     wire [31:0] instr_write_data;
     wire instr_wea;
     
-    assign instr_clk = (~mode_ctrl & ~uart_write_clk) | (mode_ctrl & ~cpu_clk);
+    assign instr_clk = (~mode_ctrl & uart_write_clk) | (mode_ctrl & cpu_clk);
     assign true_instr_addr = mode_ctrl ? (cpu_instr_addr - 32'h0040_0000) : uart_write_addr;
     assign instr_write_data = uart_write_data;
     assign instr_wea = (~mode_ctrl & ~uart_write_target & uart_wen);
@@ -138,7 +147,7 @@ module top (
     wire [31:0] data_out;
     wire data_wea;
     
-    assign data_clk = (~mode_ctrl & ~uart_write_clk) | (mode_ctrl & ~cpu_clk);
+    assign data_clk = (~mode_ctrl & uart_write_clk) | (mode_ctrl & ~cpu_clk);
     assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h7000_0000);
     assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : uart_write_addr ; // map to address starting at 0x0
     assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target & uart_wen);
@@ -174,10 +183,10 @@ module top (
     wire [31:0] MMIO_out;
 
     assign is_in_MMIO_seg = (cpu_mem_addr >= 32'hffff_0000 && cpu_mem_addr <= 32'hffff_0080);
-    assign MMIO_addr = is_in_MMIO_seg ? (cpu_mem_addr - 32'h1000_0000) : 32'h0000_0000; // map to address starting at 0x0
+    assign MMIO_addr = is_in_MMIO_seg ? (cpu_mem_addr - 32'hffff_0000) : 32'h0000_0000; // map to address starting at 0x0
     assign MMIO_wea = is_in_MMIO_seg && cpu_mem_write;
 
-    MMIO_cont MMIO_controller(.cpu_clk(~cpu_clk),
+    MMIO_cont MMIO_controller(.data_clk(~cpu_clk),
                               .dri_clk(clk),
                               .rst(rst_ctrl),
                               .addr(MMIO_addr),
@@ -186,6 +195,7 @@ module top (
                               .wea(MMIO_wea),
                               .mode(mode_ctrl),
                               .overflow(overflow),
+                              .uart_done(uart_done),
                               .buttons(buttons),
                               .switches(switches),
                               .led(led),
@@ -194,7 +204,7 @@ module top (
 
 
     // set the source of cpu_read_data
-    wire [1:0] data_dst;
+    wire [2:0] data_dst;
     
     assign data_dst = {is_in_data_seg, is_in_stack_seg, is_in_MMIO_seg};
     
