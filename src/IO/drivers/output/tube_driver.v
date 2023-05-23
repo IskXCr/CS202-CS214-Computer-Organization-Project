@@ -21,17 +21,17 @@
 
 
 module tube_driver(
-
     clk, rst, in, tubeout, tube_en
     );
     input clk;
     input rst;
-    input[31:0] in;
-    output reg[7:0] tubeout;
-	output reg[7:0] tube_en;
-	reg[3:0] cnt = 0;
-	reg[7:0] tmp[15:0];
-	reg[7:0] t = 0;
+    input [31:0] in;
+    output reg [7:0] tubeout;
+	output reg [7:0] tube_en;
+	
+	reg [3:0] cnt = 0;
+	reg [7:0] tmp[15:0];
+	reg [7:0] t = 0;
 
     always @(posedge clk, posedge rst) begin
         if (rst) begin 
@@ -55,55 +55,55 @@ module tube_driver(
 		else begin
 		    t <= (t == 50) ? 0 : t + 1;
 		    if (t == 39)
-			cnt <= (cnt == 4'd8) ? (4'd9) : (cnt + 1);
+				cnt <= (cnt == 4'd8) ? (4'd9) : (cnt + 1);
 			else
-			cnt <= cnt;
+				cnt <= cnt;
 		end
     end    
 	always @(posedge clk, posedge rst) begin
 		case (cnt)
-		4'd1:
-		begin
-			tube_en = 8'b01111111;
-			tubeout = tmp[in[31:28]];
-		end
-		4'd2:
-		begin
-			tube_en = 8'b10111111;
-			tubeout = tmp[in[27:24]];
-		end
-		4'd3:
-		begin
-			tube_en = 8'b11011111;
-			tubeout = tmp[in[23:20]];
-		end
-		4'd4:
-		begin
-			tube_en = 8'b11101111;
-			tubeout = tmp[in[19:16]];
-		end
-		4'd5:
-		begin
-			tube_en = 8'b11110111;
-			tubeout = tmp[in[15:12]];
-		end
-		4'd6:
-		begin
-			tube_en = 8'b11111011;
-			tubeout = tmp[in[11:8]];
-		end
-		4'd7:
-		begin
-			tube_en = 8'b11111101;
-			tubeout = tmp[in[7:4]];
-		end
-		4'd8:
-		begin
-			tube_en = 8'b11111110;
-			tubeout = tmp[in[3:0]];
-		end
-		default:
-		tube_en = 8'b11111111;
-	endcase
+			4'd1:
+			begin
+				tube_en = 8'b01111111;
+				tubeout = tmp[in[31:28]];
+			end
+			4'd2:
+			begin
+				tube_en = 8'b10111111;
+				tubeout = tmp[in[27:24]];
+			end
+			4'd3:
+			begin
+				tube_en = 8'b11011111;
+				tubeout = tmp[in[23:20]];
+			end
+			4'd4:
+			begin
+				tube_en = 8'b11101111;
+				tubeout = tmp[in[19:16]];
+			end
+			4'd5:
+			begin
+				tube_en = 8'b11110111;
+				tubeout = tmp[in[15:12]];
+			end
+			4'd6:
+			begin
+				tube_en = 8'b11111011;
+				tubeout = tmp[in[11:8]];
+			end
+			4'd7:
+			begin
+				tube_en = 8'b11111101;
+				tubeout = tmp[in[7:4]];
+			end
+			4'd8:
+			begin
+				tube_en = 8'b11111110;
+				tubeout = tmp[in[3:0]];
+			end
+			default:
+				tube_en = 8'b11111111;
+		endcase
 	end
 endmodule
