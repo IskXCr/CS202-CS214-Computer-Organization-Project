@@ -4,7 +4,7 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     input  wire clk,
     input  wire rst,
     
-    input  wire en, // determined whether the CPU stalls at current instruction or continues execution
+    input  wire cpu_en, // async enable. This enable signal will be processed only on negedge.
 
     output wire [31:0] instr_addr,
     input  wire [31:0] instr,
@@ -16,6 +16,28 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
 
     output wire overflow
     );
+    reg en_delay_cnt;
+    reg en;
+    always_ff @(negedge clk, posedge rst) begin
+        if (rst) begin
+            en_delay_cnt <= 1'b0;
+            en <= 1'b0;     
+        end
+        else begin
+            if (cpu_en) begin
+                if (en_delay_cnt == 1'b1) begin
+                    en <= 1'b1;
+                end
+                else begin
+                    en_delay_cnt <= en_delay_cnt + 1'b1;
+                end
+            end
+            else begin
+                en_delay_cnt <= 1'b0;
+                en <= 1'b0;
+            end
+        end
+    end
 
     wire [31:0] pc4;
     wire instr_jump, instr_branch, jump_dst;
@@ -53,9 +75,9 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
 
     // cpu_en_ctrl
     wire instr_ctrl_en, reg_ctrl_en, dmem_ctrl_en;
-    assign instr_ctrl_en = en;
-    assign reg_ctrl_en = en && rwe;
-    assign dmem_ctrl_en = en && dmem_we;
+    assign instr_ctrl_en = en && ~rst;
+    assign reg_ctrl_en = en && ~rst && rwe ;
+    assign dmem_ctrl_en = en && ~rst && dmem_we;
     
     // inst_cont
     instr_cont #(TEXT_BASE_ADDR) instr_controller(.clk(clk),

@@ -14,28 +14,8 @@ module top (
     // TODO: add other IO devices
     );
 
-    wire rst;
-    assign rst = buttons[4];
-
-    // rst_ctrl, debounce
-    reg rst_ctrl;  // real rst signal
-    reg [1:0] cnt;
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            rst_ctrl <= 1'b1;
-            cnt <= 2'b00;
-        end
-        else begin
-            if (cnt == 2'b11) begin
-                cnt <= 2'b00;
-                rst_ctrl <= 1'b0;
-            end
-            else begin
-                cnt <= cnt + 2'b01;
-            end
-        end
-    end
-
+    wire rst_ctrl;
+    assign rst_ctrl = buttons[4];
 
     // mode_ctrl
     // uart_trigger and work_trigger
@@ -43,38 +23,45 @@ module top (
     assign uart_trigger = buttons[3];
     assign work_trigger = buttons[2];
 
-    reg mode_ctrl; // 1 if WORK mode
+    reg mode_ctrl = 1'b1; // 1 if WORK mode
 
 //    initial begin
 //        mode_ctrl <= 1'b1;
 //    end
 
-    always_ff @(posedge clk, posedge rst) begin
-        if (rst) begin
+    always_ff @(posedge clk, posedge rst_ctrl) begin
+        if (rst_ctrl) begin
             mode_ctrl <= 1'b1;
         end
         else begin
-            if (work_trigger)
+            if (work_trigger) begin
                 mode_ctrl <= 1'b1;
-            else if (uart_trigger)
+            end
+            else if (uart_trigger) begin
                 mode_ctrl <= 1'b0;
-            else
-                mode_ctrl <=  mode_ctrl;
+            end
+            else begin
+                mode_ctrl <= mode_ctrl;
+            end
         end
     end
 
 
     // clk_ctrl
+    wire new_clk;
     wire cpu_clk;
     wire uart_clk;
 
-    clk_wiz_0 clk_gen(.clk_in1(clk),
-                      .reset(1'b0),
-                      .clk_out1(cpu_clk),
-                      .clk_out2(uart_clk));
+    assign cpu_clk = new_clk;
+    assign uart_clk = new_clk;
 
-//    assign cpu_clk = clk;
-//    assign uart_clk = clk;
+    clk_wiz_0 clk_gen(.clk_in1(clk),
+                     .reset(1'b0),
+                     .locked(1'b0),
+                     .clk_out1(new_clk));
+
+    // assign cpu_clk = clk;
+    // assign uart_clk = clk;
 
 
     // setup UART
@@ -98,10 +85,43 @@ module top (
 
 
     // set CPU
-    wire cpu_en;
-    wire cpu_rst;
-    assign cpu_en = mode_ctrl;
-    assign cpu_rst = rst_ctrl;
+    reg cpu_en;
+    reg cpu_rst;
+    reg [31:0] cpu_en_cnt;
+
+    always_ff @(posedge clk, posedge rst_ctrl) begin
+        if (rst_ctrl) begin
+            cpu_en <= 1'b0;
+            cpu_rst <= 1'b1;
+            cpu_en_cnt <= 0;
+        end
+        else begin
+            if (mode_ctrl) begin
+                if (cpu_en == 1'b0) begin
+                    if (cpu_en_cnt == 32'h0000_00ff) begin
+                        cpu_en <= 1'b1;
+                        cpu_rst <= 1'b0;
+                        cpu_en_cnt <= 0;
+                    end
+                    else begin
+                        cpu_en <= 1'b0;
+                        cpu_rst <= 1'b1;
+                        cpu_en_cnt <= cpu_en_cnt + 1;
+                    end
+                end
+                else begin
+                    cpu_en <= 1'b1;
+                    cpu_rst <= 1'b0;
+                    cpu_en_cnt <= 0;
+                end
+            end
+            else begin
+                cpu_en <= 1'b0;
+                cpu_rst <= 1'b1;
+                cpu_en_cnt <= 0;
+            end
+        end
+    end
 
     wire overflow;
 
@@ -111,7 +131,7 @@ module top (
     
     CPU CPU_inst(.clk(cpu_clk),
                  .rst(rst_ctrl),
-                 .en(cpu_en),
+                 .cpu_en(cpu_en),
                  .instr_addr(cpu_instr_addr),
                  .instr(cpu_instr),
                  .mem_write(cpu_mem_write),
@@ -127,10 +147,10 @@ module top (
     wire [31:0] instr_write_data;
     wire instr_wea;
     
-    assign instr_clk = (~mode_ctrl & uart_write_clk) | (mode_ctrl & cpu_clk);
+    assign instr_clk = mode_ctrl ? cpu_clk : uart_clk;
     assign true_instr_addr = mode_ctrl ? (cpu_instr_addr - 32'h0040_0000) : uart_write_addr;
     assign instr_write_data = uart_write_data;
-    assign instr_wea = (~mode_ctrl & ~uart_write_target & uart_wen);
+    assign instr_wea = (~mode_ctrl && ~uart_write_target && uart_wen);
     
                  
     instr_mem instr_memory(.clka(instr_clk),
@@ -147,10 +167,10 @@ module top (
     wire [31:0] data_out;
     wire data_wea;
     
-    assign data_clk = (~mode_ctrl & uart_write_clk) | (mode_ctrl & ~cpu_clk);
+    assign data_clk = mode_ctrl ? ~cpu_clk : uart_clk;
     assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h7000_0000);
     assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : uart_write_addr ; // map to address starting at 0x0
-    assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target & uart_wen);
+    assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target && uart_wen);
     
     data_mem data_memory(.clka(data_clk),
                          .addra(data_addr[15:2]),
