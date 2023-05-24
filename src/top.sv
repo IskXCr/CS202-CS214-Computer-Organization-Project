@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 module top (
-    input  wire clk,
+    input  wire fpga_clk,
 
     input  wire upg_rx_i,
     output wire upg_tx_o,
@@ -29,7 +29,7 @@ module top (
 //        mode_ctrl <= 1'b1;
 //    end
 
-    always_ff @(posedge clk, posedge rst_ctrl) begin
+    always_ff @(posedge fpga_clk, posedge rst_ctrl) begin
         if (rst_ctrl) begin
             mode_ctrl <= 1'b1;
         end
@@ -55,7 +55,7 @@ module top (
     assign cpu_clk = new_clk;
     assign uart_clk = new_clk;
 
-    clk_wiz_0 clk_gen(.clk_in1(clk),
+    clk_wiz_0 clk_gen(.clk_in1(fpga_clk),
                      .reset(1'b0),
 //                     .locked(1'b0),
                      .clk_out1(new_clk));
@@ -89,7 +89,7 @@ module top (
     reg cpu_rst;
     reg [31:0] cpu_en_cnt;
 
-    always_ff @(posedge clk, posedge rst_ctrl) begin
+    always_ff @(posedge fpga_clk, posedge rst_ctrl) begin
         if (rst_ctrl) begin
             cpu_en <= 1'b0;
             cpu_rst <= 1'b1;
@@ -207,7 +207,7 @@ module top (
     assign MMIO_wea = is_in_MMIO_seg && cpu_mem_write;
 
     MMIO_cont MMIO_controller(.data_clk(~cpu_clk),
-                              .dri_clk(clk),
+                              .dri_clk(fpga_clk),
                               .rst(rst_ctrl),
                               .addr(MMIO_addr),
                               .write_data(cpu_write_data),
