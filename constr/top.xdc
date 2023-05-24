@@ -1,7 +1,7 @@
 # For Minisys only
 set_property IOSTANDARD LVCMOS33 [get_ports *]
 
-set_property PACKAGE_PIN Y18 [get_ports clk]
+set_property PACKAGE_PIN Y18 [get_ports fpga_clk]
 
 set_property PACKAGE_PIN Y19 [get_ports upg_rx_i]
 set_property PACKAGE_PIN V18 [get_ports upg_tx_o]

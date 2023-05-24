@@ -12,6 +12,7 @@ module MMIO_cont(
 
     input  wire mode,
     input  wire overflow,
+    input  wire uart_wen,
     input  wire uart_done,
     input  wire [4:0]  buttons,
     input  wire [23:0] switches,
@@ -20,7 +21,7 @@ module MMIO_cont(
     output wire [7:0]  tube_seg
     );
     // address conversion
-    wire [3:0] read_addr;
+    wire [3:0] real_addr;
     assign real_addr = addr[5:2];
 
     // MMIO out configuration
@@ -32,20 +33,25 @@ module MMIO_cont(
 
 
     // assign MMIO memory
+    // source 0x0000, reserved verification
+    always_comb begin
+        mmio_regs[0] = 32'h1234_ABCD;
+    end
+    
     // source: 0x0004, scenario switch
-    wire [4:0] testcase;
+    wire [3:0] testcase;
 
-    assign testcase[4] = switches[23];
+    assign testcase[3] = switches[23];
 
     always_comb begin
-        mmio_regs[1] = {31'h0000_0000, testcase[4]};
+        mmio_regs[1] = {31'h0000_0000, testcase[3]};
     end
 
     // source: 0x0008, testcase number
-    assign testcase[3:0] = switches[22:20];
+    assign testcase[2:0] = switches[22:20];
 
     always_comb begin
-        mmio_regs[2] = {29'h0000_0000, testcase[3:0]};
+        mmio_regs[2] = {29'h0000_0000, testcase[2:0]};
     end
 
     // source: 0x000C, Operand 1
@@ -155,5 +161,6 @@ module MMIO_cont(
     // configure other directedly mapped IOs
     assign led[23] = mode;
     assign led[22] = uart_done;
+    assign led[21] = uart_wen;
 
 endmodule

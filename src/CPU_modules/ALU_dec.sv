@@ -17,8 +17,8 @@ module ALU_dec (
 
     assign shift_src = funct[2];
     assign do_unsigned = ((ALU_op == 6'b000000) & funct[5] & funct[0]) | (ALU_op[3] & ALU_op[0]);
-    assign ALU_src = ALU_op[3];
-    assign use_sign_imm = (ALU_src & ~ALU_op[2]) | ALU_op[5]; // arithmetic/logical operations OR memory access operations
+    assign ALU_src = ALU_op[3] | ALU_op[5]; // immediate arithmetic/logical operations OR memory access operations
+    assign use_sign_imm = (ALU_src & ~ALU_op[2]) | ALU_op[5]; // immediate arithmetic/logical operations OR memory access operations
 
 
     // ALU_control

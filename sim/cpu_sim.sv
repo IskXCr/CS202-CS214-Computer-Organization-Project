@@ -3,7 +3,7 @@
 module cpu_sim();
 
     reg [4:0] buttons = 5'b00000;
-    reg [23:0] switches = 24'h00_0000;
+    reg [23:0] switches = 24'h00_001A;
     wire [23:0] led;
     wire [7:0] tube_en, tube_seg;
     
@@ -22,7 +22,7 @@ module cpu_sim();
         end
     end
     
-    top top_inst(.clk(clk),
+    top top_inst(.fpga_clk(clk),
                  .buttons(buttons),
                  .switches(switches),
                  .led(led),

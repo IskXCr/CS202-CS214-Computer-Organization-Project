@@ -143,7 +143,7 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 | op[0]                     | if jump to `instr_index`, link `$ra`                   |                         |
 | op[1]                     | word                                                   |                         |
 | (op[2] & ~op[3]) \| op[5] | do sign-extension on the immediate                     |                         |
-| op[3]                     | Select the immediate as the second operand of ALU      |                         |
+| op[3] \| op[5]            | Select the immediate as the second operand of ALU      |                         |
 | op[3] & op[0]             | if I-type, do unsigned operation                       |                         |
 | op[3]                     | if memory access, do store                             |                         |
 | op[5]                     | memory access                                          |                         |
@@ -212,12 +212,13 @@ Pin constraints work on **Minisys** platform only.
 | Type (I/O) | Name                  | VarName        | Destination Device | Pin  | Description                                                  |
 | ---------- | --------------------- | -------------- | ------------------ | ---- | ------------------------------------------------------------ |
 | O          | CPU Mode Indicator    |                | LED                | K17  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
-| I          | CPU UART Mode Trigger | `uart_trigger` | Button             | TBD  | If pressed, CPU switches to UART communication mode.         |
-| I          | CPU Work Mode Trigger | `work_trigger` | Button             | TBD  | If pressed, CPU switches to work mode                        |
-| I          | Reset                 | `rst`          | Button             | TBD  | If pressed, initial an entire reset that sets CPU to UART comm mode, and resets PC and GPRs to their initial values. |
+| I          | CPU UART Mode Trigger | `uart_trigger` | Button[3]          |      | If pressed, switch CPU to UART communication mode.           |
+| I          | CPU Work Mode Trigger | `work_trigger` | Button[2]          |      | If pressed, switch CPU to work mode                          |
+| I          | Reset                 | `rst`          | Button[4]          |      | If pressed, initial an complete reset that sets CPU to **work** mode, and resets PC and GPRs to their initial values. |
 | I          | Clock Signal          | `clk`          | Wire               | Y18  | **Minisys** *built-in clock signal*.                         |
 | I          | UART_RX               | `uart_rx_i`    | Wire               | Y19  | UART input                                                   |
 | O          | UART_TX               | `uart_tx_o`    | wire               | V18  | UART output                                                  |
+| O          | UART_WEN              | `uart_wen`     | LED                | TBD  | UART write-enable signal indicator.                          |
 | O          | UART_DONE             |                | LED                | TBD  | UART transmission done indicator.                            |
 
 

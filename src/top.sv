@@ -56,9 +56,9 @@ module top (
     assign uart_clk = new_clk;
 
     clk_wiz_0 clk_gen(.clk_in1(fpga_clk),
-                     .reset(1'b0),
+                      .reset(1'b0),
 //                     .locked(1'b0),
-                     .clk_out1(new_clk));
+                      .clk_out1(new_clk));
 
     // assign cpu_clk = clk;
     // assign uart_clk = clk;
@@ -70,13 +70,14 @@ module top (
     wire uart_write_target;      // 0 for instruction, 1 for memory
     // assign uart
     wire uart_write_clk;
-    wire uart_wen;
+    wire uart_wen, uart_wen_o;
     wire uart_done;
+    BUFG bufg(.I(uart_wen_o), .O(uart_wen));
 
     uart_bmpg_0 uart_controller(.upg_clk_i(uart_clk),
                                 .upg_rst_i(rst_ctrl),
                                 .upg_clk_o(uart_write_clk),
-                                .upg_wen_o(uart_wen),
+                                .upg_wen_o(uart_wen_o),
                                 .upg_adr_o({uart_write_target, uart_write_addr}),
                                 .upg_dat_o(uart_write_data),
                                 .upg_done_o(uart_done),
@@ -168,7 +169,7 @@ module top (
     wire data_wea;
     
     assign data_clk = mode_ctrl ? ~cpu_clk : uart_clk;
-    assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h7000_0000);
+    assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h1002_0000);
     assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : uart_write_addr ; // map to address starting at 0x0
     assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target && uart_wen);
     
@@ -185,7 +186,7 @@ module top (
     wire stack_wea;
     wire [31:0] stack_out;
     
-    assign is_in_stack_seg = (cpu_mem_addr >= 32'h7000_0000 && cpu_mem_addr <= 32'h7fff_effc);
+    assign is_in_stack_seg = (cpu_mem_addr >= 32'h7ffe_effc && cpu_mem_addr <= 32'h7fff_effc);
     assign stack_addr = is_in_stack_seg  ? (32'h7fff_effc - cpu_mem_addr) : 32'h0000_0000; // map to address starting at 0x0
     assign stack_wea = is_in_stack_seg  && cpu_mem_write;
     
@@ -215,6 +216,7 @@ module top (
                               .wea(MMIO_wea),
                               .mode(mode_ctrl),
                               .overflow(overflow),
+                              .uart_wen(uart_wen_led),
                               .uart_done(uart_done),
                               .buttons(buttons),
                               .switches(switches),
