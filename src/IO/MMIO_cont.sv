@@ -12,7 +12,8 @@ module MMIO_cont(
 
     input  wire mode,
     input  wire overflow,
-    input  wire uart_wen,
+    input  wire instr_wen,
+    input  wire data_wen,
     input  wire uart_done,
     input  wire [4:0]  buttons,
     input  wire [23:0] switches,
@@ -161,6 +162,7 @@ module MMIO_cont(
     // configure other directedly mapped IOs
     assign led[23] = mode;
     assign led[22] = uart_done;
-    assign led[21] = uart_wen;
+    assign led[21] = instr_wen;
+    assign led[20] = data_wen;
 
 endmodule

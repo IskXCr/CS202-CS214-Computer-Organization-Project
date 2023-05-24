@@ -29,7 +29,7 @@ module top (
 //        mode_ctrl <= 1'b1;
 //    end
 
-    always_ff @(posedge fpga_clk, posedge rst_ctrl) begin
+    always_ff @(negedge fpga_clk, posedge rst_ctrl) begin
         if (rst_ctrl) begin
             mode_ctrl <= 1'b1;
         end
@@ -65,6 +65,7 @@ module top (
 
 
     // setup UART
+    reg  uart_rst;
     wire [13:0] uart_write_addr;
     wire [31:0] uart_write_data;
     wire uart_write_target;      // 0 for instruction, 1 for memory
@@ -74,8 +75,22 @@ module top (
     wire uart_done;
     BUFG bufg(.I(uart_wen_o), .O(uart_wen));
 
+    always_ff @(posedge fpga_clk, posedge rst_ctrl) begin
+        if (rst_ctrl) begin
+            uart_rst <= 1'b1;
+        end
+        else begin
+            if (mode_ctrl) begin
+                uart_rst <= 1'b1;
+            end
+            else begin
+                uart_rst <= 1'b0;
+            end
+        end
+    end
+
     uart_bmpg_0 uart_controller(.upg_clk_i(uart_clk),
-                                .upg_rst_i(rst_ctrl),
+                                .upg_rst_i(uart_rst),
                                 .upg_clk_o(uart_write_clk),
                                 .upg_wen_o(uart_wen_o),
                                 .upg_adr_o({uart_write_target, uart_write_addr}),
@@ -102,11 +117,11 @@ module top (
                     if (cpu_en_cnt == 32'h0000_00ff) begin
                         cpu_en <= 1'b1;
                         cpu_rst <= 1'b0;
-                        cpu_en_cnt <= 0;
+                        cpu_en_cnt <= cpu_en_cnt;
                     end
                     else begin
                         cpu_en <= 1'b0;
-                        cpu_rst <= 1'b1;
+                        cpu_rst <= 1'b0;
                         cpu_en_cnt <= cpu_en_cnt + 1;
                     end
                 end
@@ -131,7 +146,7 @@ module top (
     reg  [31:0] cpu_read_data;
     
     CPU CPU_inst(.clk(cpu_clk),
-                 .rst(rst_ctrl),
+                 .rst(cpu_rst),
                  .cpu_en(cpu_en),
                  .instr_addr(cpu_instr_addr),
                  .instr(cpu_instr),
@@ -148,8 +163,8 @@ module top (
     wire [31:0] instr_write_data;
     wire instr_wea;
     
-    assign instr_clk = mode_ctrl ? cpu_clk : uart_clk;
-    assign true_instr_addr = mode_ctrl ? (cpu_instr_addr - 32'h0040_0000) : uart_write_addr;
+    assign instr_clk = mode_ctrl ? cpu_clk : uart_write_clk;
+    assign true_instr_addr = mode_ctrl ? (cpu_instr_addr - 32'h0040_0000) : {16'h0000, uart_write_addr, 2'b00};
     assign instr_write_data = uart_write_data;
     assign instr_wea = (~mode_ctrl && ~uart_write_target && uart_wen);
     
@@ -165,17 +180,19 @@ module top (
     wire data_clk;
     wire is_in_data_seg;
     wire [31:0] data_addr;
+    wire [31:0] data_write_data;
     wire [31:0] data_out;
     wire data_wea;
     
-    assign data_clk = mode_ctrl ? ~cpu_clk : uart_clk;
+    assign data_clk = mode_ctrl ? ~cpu_clk : uart_write_clk;
     assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h1002_0000);
-    assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : uart_write_addr ; // map to address starting at 0x0
+    assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : {16'h0000, uart_write_addr, 2'b00}; // map to address starting at 0x0
+    assign data_write_data = mode_ctrl ? cpu_write_data : uart_write_data;
     assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target && uart_wen);
     
     data_mem data_memory(.clka(data_clk),
                          .addra(data_addr[15:2]),
-                         .dina(cpu_write_data),
+                         .dina(data_write_data),
                          .douta(data_out),
                          .wea(data_wea));
     
@@ -209,14 +226,15 @@ module top (
 
     MMIO_cont MMIO_controller(.data_clk(~cpu_clk),
                               .dri_clk(fpga_clk),
-                              .rst(rst_ctrl),
+                              .rst(cpu_rst),
                               .addr(MMIO_addr),
                               .write_data(cpu_write_data),
                               .read_data(MMIO_out),
                               .wea(MMIO_wea),
                               .mode(mode_ctrl),
                               .overflow(overflow),
-                              .uart_wen(uart_wen_led),
+                              .instr_wen(instr_wea),
+                              .data_wen(data_wea),
                               .uart_done(uart_done),
                               .buttons(buttons),
                               .switches(switches),
