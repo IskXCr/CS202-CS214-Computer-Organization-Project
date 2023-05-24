@@ -10,19 +10,15 @@ module cpu_sim();
     reg clk = 0;
     
     initial begin
-        #5 buttons[4] = 1;
-        #5 buttons[4] = 0;
-        #100 buttons[3] = 1;
-        #50 buttons[3] = 0;
-        #100 buttons[2] = 1;
-        #5 buttons[2] = 0;
-        #100 buttons[4] = 1;
-        #5 buttons[4] = 0;
+        #500 buttons[4] = 1;
+        #500 buttons[4] = 0;
+        #6000 buttons[4] = 1;
+        #6500 buttons[4] = 0;
     end
     
     initial begin
         forever begin
-            #1 clk = ~clk;
+            #5 clk = ~clk;
         end
     end
     

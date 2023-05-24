@@ -57,7 +57,7 @@ module top (
 
     clk_wiz_0 clk_gen(.clk_in1(clk),
                      .reset(1'b0),
-                     .locked(1'b0),
+//                     .locked(1'b0),
                      .clk_out1(new_clk));
 
     // assign cpu_clk = clk;
