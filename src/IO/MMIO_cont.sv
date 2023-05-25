@@ -2,13 +2,13 @@
 
 module MMIO_cont(
     input  wire data_clk, // write data on posedge of this clk
-    input  wire dri_clk,  // 100 MHz clk onboard.
+    input  wire fpga_clk,  // 100 MHz clk onboard.
     input  wire rst,      // clear writable memory
 
     input  wire [31:0] addr, // starting at 0x0000_0000
     input  wire [31:0] write_data,
     output wire [31:0] read_data, // for addr, return the data read on next posedge of this clk. addr starts from 0x00000000.
-    input  wire wea,
+    input  wire wen,
 
     input  wire mode,
     input  wire overflow,
@@ -130,13 +130,13 @@ module MMIO_cont(
     ///////////////////////////////////////////////////
 
     // source: 0x0020, 0x0024, 0x0028, 0x002c, single LED indicator
-    wire led_seg_wea_1;
-    wire [3:0] led_wea_1;
+    wire led_seg_wen_1;
+    wire [3:0] led_wen_1;
     
-    assign led_wea_1[0] = (wea && addr[15:0] == 16'h0020);
-    assign led_wea_1[1] = (wea && addr[15:0] == 16'h0024);
-    assign led_wea_1[2] = (wea && addr[15:0] == 16'h0028);
-    assign led_wea_1[3] = (wea && addr[15:0] == 16'h002c);
+    assign led_wen_1[0] = (wen && addr[15:0] == 16'h0020);
+    assign led_wen_1[1] = (wen && addr[15:0] == 16'h0024);
+    assign led_wen_1[2] = (wen && addr[15:0] == 16'h0028);
+    assign led_wen_1[3] = (wen && addr[15:0] == 16'h002c);
 
     assign led[19] = mmio_regs[8] != 32'h0000_0000;
     assign led[18] = mmio_regs[9] != 32'h0000_0000;
@@ -151,10 +151,10 @@ module MMIO_cont(
             mmio_regs[11] = 32'h0000_0000;
         end
         else begin
-            mmio_regs[8] = led_wea_1[0] ? write_data : mmio_regs[8];
-            mmio_regs[9] = led_wea_1[1] ? write_data : mmio_regs[9];
-            mmio_regs[10] = led_wea_1[2] ? write_data : mmio_regs[10];
-            mmio_regs[11] = led_wea_1[3] ? write_data : mmio_regs[11];
+            mmio_regs[8] = led_wen_1[0] ? write_data : mmio_regs[8];
+            mmio_regs[9] = led_wen_1[1] ? write_data : mmio_regs[9];
+            mmio_regs[10] = led_wen_1[2] ? write_data : mmio_regs[10];
+            mmio_regs[11] = led_wen_1[3] ? write_data : mmio_regs[11];
         end
     end
 
@@ -163,13 +163,13 @@ module MMIO_cont(
 
     // source: 0x0030, 0x0034 tube segment
     wire [31:0] tube_driver_in;
-    wire [1:0] tube_wea;
+    wire [1:0] tube_wen;
 
     assign tube_driver_in = {mmio_regs[12][15:0], {mmio_regs[13][15:0]}};
-    assign tube_wea[0] = (wea && addr[15:0] == 16'h0030);
-    assign tube_wea[1] = (wea && addr[15:0] == 16'h0034);
+    assign tube_wen[0] = (wen && addr[15:0] == 16'h0030);
+    assign tube_wen[1] = (wen && addr[15:0] == 16'h0034);
 
-    tube_driver tube_cont(.clk(dri_clk),
+    tube_driver tube_cont(.clk(fpga_clk),
                           .rst(rst),
                           .in(tube_driver_in),
                           .tube_seg(tube_seg),
@@ -181,8 +181,8 @@ module MMIO_cont(
             mmio_regs[13] = 32'h0000_0000;
         end
         else begin
-            mmio_regs[12] = tube_wea[0] ? write_data : mmio_regs[12];
-            mmio_regs[13] = tube_wea[1] ? write_data : mmio_regs[13];
+            mmio_regs[12] = tube_wen[0] ? write_data : mmio_regs[12];
+            mmio_regs[13] = tube_wen[1] ? write_data : mmio_regs[13];
         end
     end
 
@@ -190,9 +190,9 @@ module MMIO_cont(
     ///////////////////////////////////////////////////
 
     // source: 0x0038, 16 bit LED
-    wire led_seg_wea_2;
+    wire led_seg_wen_2;
 
-    assign led_seg_wea_2 = (addr[15:0] == 16'h0038) && wea;
+    assign led_seg_wen_2 = (addr[15:0] == 16'h0038) && wen;
     assign led[15:0] = mmio_regs[14][15:0];
 
     always_ff @(posedge data_clk, posedge rst) begin
@@ -200,7 +200,7 @@ module MMIO_cont(
             mmio_regs[14] = 32'h0000_0000;
         end
         else begin
-            mmio_regs[14] = led_seg_wea_2 ? write_data : mmio_regs[14];
+            mmio_regs[14] = led_seg_wen_2 ? write_data : mmio_regs[14];
         end
     end
 
@@ -212,20 +212,21 @@ module MMIO_cont(
     ///////////////////////////////////////////////////
 
     // source: 0x0100 to 0x0a60, VGA text buffer
-    wire vga_buf_wea;
+    wire vga_buf_wen;
     wire [31:0] vga_addr;
     wire [31:0] vga_write_data;
     wire [31:0] vga_read_data;
 
     assign is_in_mmio_seg_2 = addr[15:8] >= 8'h01 && addr[15:8] <= 8'h0a;
-    assign vga_buf_wea = is_in_mmio_seg_2 && wea;
+    assign vga_buf_wen = is_in_mmio_seg_2 && wen;
     assign vga_addr = is_in_mmio_seg_2 ? (addr - 32'h0000_0100) : 32'h0000_0000;
     assign vga_write_data = write_data;
     assign mmio_out_2 = vga_read_data;
 
-    VGA_top vga_controller(.data_clk(data_clk),
-                           .dri_clk(dri_clk),
-                           .wea(vga_buf_wea),
+    VGA_top VGA_controller(.data_clk(data_clk),
+                           .fpga_clk(fpga_clk),
+                           .rst(rst),
+                           .wen(vga_buf_wen),
                            .addr(vga_addr),
                            .write_data(vga_write_data),
                            .read_data(vga_read_data),

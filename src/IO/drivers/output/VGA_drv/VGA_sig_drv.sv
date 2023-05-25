@@ -2,8 +2,10 @@
 // reference: https://github.com/IskXCr/CS211-Project-Flappy-Bird/blob/main/Source/VGA_DRIVER.sv
 // reference: slides from SUSTech CS211 Digital Logic
 
-module VGA_driver(
-    input  wire clk,           // clk base frequency: 100 MHz
+// CAUTION: this module is tailored for 480p.
+//          If you are to change this, you must also refactor other parts where suitness for 480p is explicitly stated.
+module VGA_sig_drv(
+    input  wire clk,           // clk base frequency: 25.175 MHz for 480p
     input  wire rst,           // high active
     
     input  wire [11:0] v_data, // input color data in RGB444 format
@@ -12,12 +14,9 @@ module VGA_driver(
     output wire [3:0]  blue,
     output wire        hsync,
     output wire        vsync,
-    output wire [11:0] pos_x,  // output current rendering position. v_data must be ready at this position.
-    output wire [11:0] pos_y   // output current rendering position. v_data must be ready at this position.
+    output wire [9:0]  pos_x,  // data length for 480p. output current rendering position. v_data must be ready at this position.
+    output wire [9:0]  pos_y   // data length for 480p. output current rendering position. v_data must be ready at this position.
     );
-    
-    wire dri_clk; // dri_clk should be at 
-    clk_wiz_1 clk_gen(.clk_in1(clk), .clk_out1(dri_clk), .reset(1'b0));
     
     
     // VGA MODE SPECIFICATION
@@ -39,11 +38,11 @@ module VGA_driver(
     
 
     // horizontal counter
-    reg  [11:0] hc;
+    reg [9:0] hc;
 
-    assign pos_x = (hc >= C_H_SYNC_PULSE + C_H_BACK_PORCH) ? hc - (C_H_SYNC_PULSE + C_H_BACK_PORCH) : 0;
+    assign pos_x = ((hc >= C_H_SYNC_PULSE + C_H_BACK_PORCH) && (hc < C_H_LINE_PERIOD - C_H_FRONT_PORCH)) ? hc - (C_H_SYNC_PULSE + C_H_BACK_PORCH) : C_H_ACTIVE_TIME;
 
-    always @(posedge dri_clk) begin
+    always_ff @(posedge clk) begin
        if(rst)
            hc <= 0;
        else if(hc == C_H_LINE_PERIOD - 1)
@@ -54,11 +53,11 @@ module VGA_driver(
     
 
     // vertical counter
-    reg [11:0] vc;
+    reg [9:0] vc;
 
-    assign pos_y = (vc >= C_V_SYNC_PULSE + C_V_BACK_PORCH) ? vc - (C_V_SYNC_PULSE + C_V_BACK_PORCH) : 0;
+    assign pos_y = ((vc >= C_V_SYNC_PULSE + C_V_BACK_PORCH) && (vc < C_V_FRAME_PERIOD - C_V_FRONT_PORCH)) ? vc - (C_V_SYNC_PULSE + C_V_BACK_PORCH) : C_V_ACTIVE_TIME;
 
-    always @(posedge dri_clk) begin
+    always_ff @(posedge clk) begin
        if(rst)
            vc <= 0;
        else if(vc == C_V_FRAME_PERIOD - 1 && hc == C_H_LINE_PERIOD - 1)

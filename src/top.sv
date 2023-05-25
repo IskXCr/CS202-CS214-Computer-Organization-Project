@@ -32,7 +32,7 @@ module top (
     assign uart_trigger = buttons[3];
     assign work_trigger = buttons[2];
 
-    reg mode_ctrl = 1'b1; // 1 if WORK mode
+    reg mode_ctrl = 1'b0; // 1 if WORK mode
 
 //    initial begin
 //        mode_ctrl <= 1'b1;
@@ -178,19 +178,19 @@ module top (
     wire instr_clk;
     wire [31:0] true_instr_addr;
     wire [31:0] instr_write_data;
-    wire instr_wea;
+    wire instr_wen;
     
     assign instr_clk = mode_ctrl ? cpu_clk : uart_write_clk;
     assign true_instr_addr = mode_ctrl ? (cpu_instr_addr - 32'h0040_0000) : {16'h0000, uart_write_addr, 2'b00};
     assign instr_write_data = uart_write_data;
-    assign instr_wea = (~mode_ctrl && ~uart_write_target && uart_wen);
+    assign instr_wen = (~mode_ctrl && ~uart_write_target && uart_wen);
     
                  
     instr_mem instr_memory(.clka(instr_clk),
                            .addra(true_instr_addr[15:2]),
                            .dina(instr_write_data),
                            .douta(cpu_instr),
-                           .wea(instr_wea));
+                           .wen(instr_wen));
 
 
     //////////////////////////////////////////////////
@@ -201,19 +201,19 @@ module top (
     wire [31:0] data_addr;
     wire [31:0] data_write_data;
     wire [31:0] data_out;
-    wire data_wea;
+    wire data_wen;
     
     assign data_clk = mode_ctrl ? ~cpu_clk : uart_write_clk;
     assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h1002_0000);
     assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : {16'h0000, uart_write_addr, 2'b00}; // map to address starting at 0x0
     assign data_write_data = mode_ctrl ? cpu_write_data : uart_write_data;
-    assign data_wea = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target && uart_wen);
+    assign data_wen = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target && uart_wen);
     
     data_mem data_memory(.clka(data_clk),
-                         .addra(data_addr[15:2]),
+                         .addra(data_addr[17:2]),
                          .dina(data_write_data),
                          .douta(data_out),
-                         .wea(data_wea));
+                         .wen(data_wen));
     
 
     //////////////////////////////////////////////////
@@ -221,18 +221,18 @@ module top (
     // set stack memory
     wire is_in_stack_seg;
     wire [31:0] stack_addr;
-    wire stack_wea;
+    wire stack_wen;
     wire [31:0] stack_out;
     
     assign is_in_stack_seg = (cpu_mem_addr >= 32'h7ffe_f000 && cpu_mem_addr <= 32'h7fff_effc);
     assign stack_addr = is_in_stack_seg  ? (32'h7fff_effc - cpu_mem_addr) : 32'h0000_0000; // map to address starting at 0x0
-    assign stack_wea = is_in_stack_seg  && cpu_mem_write;
+    assign stack_wen = is_in_stack_seg  && cpu_mem_write;
     
     stack_mem stack_memory(.clka(~cpu_clk),
                            .addra(stack_addr[15:2]),
                            .dina(cpu_write_data),
                            .douta(stack_out),
-                           .wea(stack_wea));
+                           .wen(stack_wen));
 
 
     //////////////////////////////////////////////////
@@ -240,30 +240,33 @@ module top (
     // set MMIO
     wire is_in_MMIO_seg;
     wire [31:0] MMIO_addr;
-    wire MMIO_wea;
+    wire MMIO_wen;
     wire [31:0] MMIO_out;
 
     assign is_in_MMIO_seg = (cpu_mem_addr >= 32'hffff_0000 && cpu_mem_addr <= 32'hffff_0a60);
     assign MMIO_addr = is_in_MMIO_seg ? (cpu_mem_addr - 32'hffff_0000) : 32'h0000_0000; // map to address starting at 0x0
-    assign MMIO_wea = is_in_MMIO_seg && cpu_mem_write;
+    assign MMIO_wen = is_in_MMIO_seg && cpu_mem_write;
 
     MMIO_cont MMIO_controller(.data_clk(~cpu_clk),
-                              .dri_clk(fpga_clk),
+                              .fpga_clk(fpga_clk),
                               .rst(cpu_rst),
+
                               .addr(MMIO_addr),
                               .write_data(cpu_write_data),
                               .read_data(MMIO_out),
-                              .wea(MMIO_wea),
+                              .wen(MMIO_wen),
                               .mode(mode_ctrl),
                               .overflow(overflow),
-                              .instr_wen(instr_wea),
-                              .data_wen(data_wea),
+                              .instr_wen(instr_wen),
+                              .data_wen(data_wen),
                               .uart_done(uart_done),
+
                               .buttons(buttons),
                               .switches(switches),
                               .led(led),
                               .tube_en(tube_en),
                               .tube_seg(tube_seg),
+                              
                               .vga_red(vga_red),
                               .vga_green(vga_green),
                               .vga_blue(vga_blue),

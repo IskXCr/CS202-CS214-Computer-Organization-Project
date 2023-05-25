@@ -180,13 +180,13 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 ### Memory Specification
 
-| Segment | Offset      | ITB? | Boundary    | ITB? | Size        | Source                         |
-| ------- | ----------- | ---- | ----------- | ---- | ----------- | ------------------------------ |
-| Text    | 0x0040_0000 | Y    | 0x0041_0000 | N    | 16384 Words | Block Memory Generator         |
-| Data    | 0x1001_0000 | Y    | 0x1002_0000 | N    | 65536 Words | Block Memory Generator         |
-| Stack   | 0x7fff_effc | Y    | 0x7ffe_f000 | Y    | 16384 Words | Block Memory Generator         |
-| MMIO    | 0xffff_0000 | Y    | 0xffff_0040 | N    | 16 Words    | Memory-Mapped IO Segment **1** |
-| MMIO    | 0xffff_0100 | Y    | 0xffff_0A60 | N    | 600 Words   | Memory-Mapped IO Segment **2** |
+| Segment | Offset      | ITB? | Boundary    | ITB? | Size        | Source                                     |
+| ------- | ----------- | ---- | ----------- | ---- | ----------- | ------------------------------------------ |
+| Text    | 0x0040_0000 | Y    | 0x0041_0000 | N    | 16384 Words | Block Memory Generator                     |
+| Data    | 0x1001_0000 | Y    | 0x1002_0000 | N    | 65536 Words | Block Memory Generator                     |
+| Stack   | 0x7fff_effc | Y    | 0x7ffe_f000 | Y    | 16384 Words | Block Memory Generator                     |
+| MMIO    | 0xffff_0000 | Y    | 0xffff_0040 | N    | 16 Words    | Memory-Mapped IO Segment **1**             |
+| MMIO    | 0xffff_0100 | Y    | 0xffff_0A60 | N    | 600 Words   | Memory-Mapped IO Segment **2** for **VGA** |
 
 *ITB*: ***Include this boundary***
 
