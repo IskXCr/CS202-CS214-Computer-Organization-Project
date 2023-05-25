@@ -1,3 +1,4 @@
+# Test Subject: The scenario_2
 .data 
     push_count: .word 0
     pop_count: .word 0

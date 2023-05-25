@@ -1,4 +1,4 @@
-# Test Subject: The senario_1
+# Test Subject: The scenario_1
 
 .data 
 

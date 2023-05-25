@@ -143,7 +143,7 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 | op[0]                     | if jump to `instr_index`, link `$ra`                   |                         |
 | op[1]                     | word                                                   |                         |
 | (op[2] & ~op[3]) \| op[5] | do sign-extension on the immediate                     |                         |
-| op[3]                     | Select the immediate as the second operand of ALU      |                         |
+| op[3] \| op[5]            | Select the immediate as the second operand of ALU      |                         |
 | op[3] & op[0]             | if I-type, do unsigned operation                       |                         |
 | op[3]                     | if memory access, do store                             |                         |
 | op[5]                     | memory access                                          |                         |
@@ -170,9 +170,9 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 | Segment | Offset      | Boundary    | Size        | Source                 |
 | ------- | ----------- | ----------- | ----------- | ---------------------- |
-| Text    | 0x0040_0000 | 0x0040_4000 | 16384 Words | Block Memory Generator |
-| Data    | 0x1001_0000 | 0x1001_4000 | 16384 Words | Block Memory Generator |
-| Stack   | 0x7fff_effc | 0x7fff_affc | 16384 Words | Block Memory Generator |
+| Text    | 0x0040_0000 | 0x0041_0000 | 16384 Words | Block Memory Generator |
+| Data    | 0x1001_0000 | 0x1002_0000 | 65536 Words | Block Memory Generator |
+| Stack   | 0x7fff_effc | 0x7ffe_effc | 16384 Words | Block Memory Generator |
 | MMIO    | 0xffff_0000 | 0xffff_0080 | 32 Words    | Memory-Mapped IO       |
 
 Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to get the actual address inside the block memory.
@@ -181,35 +181,47 @@ Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to g
 
 ### MMIO Specification
 
-*MMIO* configuration is tailored to meet requirements for CS214 Project Inspection.
+*MMIO* configuration is tailored to meet the requirements for CS214 Project Inspection.
 
-Pin constraint only works only on *Minisys*.
+Pin constraints only work only on *Minisys*.
 
 | Physical Segment Base | R/W Support | Size (Word) | Destination Device | Description |
 | --------------------- | ---------- | ---- | ------------------ | ----------- |
 | 0xffff_0000 | R/W         | 1 |  | Reserved |
 | 0xffff_0004 | R | 1 | SW[23] | `0` if scenario 1. `1` if scenario 2. |
-| 0xffff_0008 | R | 1 | SW[22:20] | Testcase sample. |
-| 0xffff_000C | R | 1 | SW[15:8] | Operand 1. Sign extension according to specific testcases. |
+| 0xffff_0008 | R | 1 | SW[22:20] | Testcase number, 3 bits. |
+| 0xffff_000c | R | 1 | SW[15:8] | Operand 1. Sign extension according to specific testcases. |
 | 0xffff_0010 | R | 1 | SW[7:0] | Operand 2. Sign extension according to specific testcases. |
-| 0xffff_0014 | R | 1 | Keypad | Keypad number. Maximum 1 word. |
-| 0xffff_0020 | R/W | 1 | LED@K17 | Single LED indicator.                                      |
-| 0xffff_0024 | R/W | 1 | LED Tube LEFT | 7-seg tube output in hex.                                  |
-| 0xffff_0028 | R/W | 1 | LED Tube RIGHT | 7-seg tube output in hex.                                  |
-| 0xffff_002C | R/W | 1 | LED[15:0] | 16 bit LED output.                                         |
+| 0xffff_0014 | R | 1 | Keypad | Keypad number in hex. Maximum 1 word. |
+| 0xffff_0020 | R/W | 1 | LED[19] | Single LED indicator.                                      |
+| 0xffff_0024 | R/W | 1 | LED[18] | Single LED indicator                                       |
+| 0xffff_0028 | R/W | 1 | LED[17] | Single LED indicator                                       |
+| 0xffff_002c | R/W | 1 | LED[16] | Single LED indicator                                       |
+| 0xffff_0030 | R/W | 1 | LED Tube LEFT | 7-seg tube output in hex.                                  |
+| 0xffff_0034 | R/W | 1 | LED Tube RIGHT | 7-seg tube output in hex.                                  |
+| 0xffff_0038 | R/W | 1 | LED[15:0] | 16 bit LED output.                                         |
 
 
 
 ### Other IO Devices
 
-Configuration of other IO devices is tailored to meet requirements for CS214 Project Inspection.
+Configuration of other IO devices is tailored to meet the requirements for CS214 Project Inspection.
 
 Pin constraints work on **Minisys** platform only.
 
-| Destination Device | Pin  | Description                                                  |
-| ------------------ | ---- | ------------------------------------------------------------ |
-| CPU Mode Indicator | L13  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
-|                    |      |                                                              |
+| Type (I/O) | Name                  | VarName          | Destination Device | Pin  | Description                                                  |
+| ---------- | --------------------- | ---------------- | ------------------ | ---- | ------------------------------------------------------------ |
+| I          | Clock Signal          | `clk`            | Wire               | Y18  | **Minisys** *built-in clock signal*.                         |
+| I          | UART_RX               | `uart_rx_i`      | Wire               | Y19  | UART input                                                   |
+| O          | UART_TX               | `uart_tx_o`      | wire               | V18  | UART output                                                  |
+| I          | CPU UART Mode Trigger | `uart_trigger`   | Button[3]          |      | If pressed, switch CPU to UART communication mode.           |
+| I          | CPU Work Mode Trigger | `work_trigger`   | Button[2]          |      | If pressed, switch CPU to work mode                          |
+| I          | Reset                 | `rst`            | Button[4]          |      | If pressed, initial an complete reset that sets CPU to **work** mode, and resets PC and GPRs to their initial values. |
+| O          | CPU Mode Indicator    |                  | LED[23]            |      | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
+| O          | UART_DONE             |                  | LED[22]            |      | UART transmission done indicator.                            |
+| O          | UART_WRITE_ENABLE     | `uart_wen`       | LED[21]            |      | UART write-enable signal indicator.                          |
+| O          | INSTR_WEN             | `uart_instr_wen` | LED[20]            |      | UART instruction write-enable signal                         |
+| O          | DATA_WEN              | `uart_data_wen`  | LED[19]            |      | UART data write-enable signal                                |
 
 
 

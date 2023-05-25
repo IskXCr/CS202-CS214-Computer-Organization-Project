@@ -1,19 +1,32 @@
 `timescale 1ns/1ps
 
 module cpu_sim();
+
+    reg [4:0] buttons = 5'b00000;
+    reg [23:0] switches = 24'h00_001A;
+    wire [23:0] led;
+    wire [7:0] tube_en, tube_seg;
     
     reg clk = 0;
-    reg rst = 0;
     
     initial begin
-        #50 rst = 1;
-        #50 rst = 0;
+        #500 buttons[4] = 1;
+        #500 buttons[4] = 0;
+        #6000 buttons[4] = 1;
+        #6500 buttons[4] = 0;
+    end
+    
+    initial begin
         forever begin
-            #50 clk = ~clk;
+            #5 clk = ~clk;
         end
     end
     
-    top top_inst(.clk(clk),
-                 .rst(rst));
+    top top_inst(.fpga_clk(clk),
+                 .buttons(buttons),
+                 .switches(switches),
+                 .led(led),
+                 .tube_en(tube_en),
+                 .tube_seg(tube_seg));
     
 endmodule

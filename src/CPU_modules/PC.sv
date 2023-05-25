@@ -10,7 +10,7 @@ module PC #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
 
     always_ff @(posedge clk, posedge rst) begin
         if (rst) begin
-            q <= $signed(TEXT_BASE_ADDR) - $signed(32'h0000_0004);
+            q <= TEXT_BASE_ADDR;
         end
         else if (en) begin
             q <= d;
