@@ -1,4 +1,4 @@
-.data 
+.data
 
 .text
 .global main
