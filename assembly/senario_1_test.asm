@@ -14,7 +14,7 @@ test_000:
     li $t2, 0
     li $t3, 0
     li $t4, 7
-    andi $t6, $t0, 0x7F
+    andi $t6, $t0, 0x7f
     # t6 should be 87
 loop_7bit:
     andi $t5, $t6, 1
