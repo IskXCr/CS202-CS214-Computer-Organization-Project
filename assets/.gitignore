@@ -1,0 +1,6 @@
+# filter out disassembled assets
+imgs
+img_convd
+
+.png
+.txt
