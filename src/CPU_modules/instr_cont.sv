@@ -17,11 +17,10 @@ module instr_cont #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     
     wire [31:0] current_addr;
 
-    // debug purpose
+    // for debug purpose
     wire [31:0] branch_addr;
     wire [31:0] jump_instr_addr;
 
-    // debug purpose
     assign pc4 = current_addr + 32'h0000_0004;
     assign branch_addr = pc4 + {{14{instr[15]}}, instr[15:0], 2'b00};
     assign jump_instr_addr = {current_addr[31:28], instr[25:0], 2'b00};
