@@ -19,8 +19,24 @@ module MMIO_cont(
     input  wire [23:0] switches,
     output wire [23:0] led,
     output wire [7:0]  tube_en,
-    output wire [7:0]  tube_seg
+    output wire [7:0]  tube_seg,
+
+    output wire [3:0]  vga_red,
+    output wire [3:0]  vga_green,
+    output wire [3:0]  vga_blue,
+    output wire vga_hsync,
+    output wire vga_vsync
     );
+    
+    
+    // configure directedly mapped IOs
+    assign led[23] = mode;
+    assign led[22] = uart_done;
+    assign led[21] = instr_wen;
+    assign led[20] = data_wen;
+
+
+    // --------MMIO Preparation--------
     // address conversion
     wire [3:0] real_addr;
     assign real_addr = addr[5:2];
@@ -31,7 +47,6 @@ module MMIO_cont(
     
     assign mmio_out = mmio_regs;
     assign read_data = mmio_out[real_addr];
-
 
     // assign MMIO memory
     // source 0x0000, reserved verification
@@ -158,11 +173,5 @@ module MMIO_cont(
             mmio_regs[14] = led_seg_wea_2 ? write_data : mmio_regs[14];
         end
     end
-
-    // configure other directedly mapped IOs
-    assign led[23] = mode;
-    assign led[22] = uart_done;
-    assign led[21] = instr_wen;
-    assign led[20] = data_wen;
 
 endmodule

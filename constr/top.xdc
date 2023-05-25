@@ -79,3 +79,22 @@ set_property PACKAGE_PIN E17 [get_ports {tube_seg[3]}]
 set_property PACKAGE_PIN C14 [get_ports {tube_seg[2]}]
 set_property PACKAGE_PIN C15 [get_ports {tube_seg[1]}]
 set_property PACKAGE_PIN E13 [get_ports {tube_seg[0]}]
+
+# VGA
+set_property PACKAGE_PIN H15 [get_ports {vga_red[3]}]
+set_property PACKAGE_PIN J15 [get_ports {vga_red[2]}]
+set_property PACKAGE_PIN G18 [get_ports {vga_red[1]}]
+set_property PACKAGE_PIN G17 [get_ports {vga_red[0]}]
+
+set_property PACKAGE_PIN H22 [get_ports {vga_green[3]}]
+set_property PACKAGE_PIN J22 [get_ports {vga_green[2]}]
+set_property PACKAGE_PIN H18 [get_ports {vga_green[1]}]
+set_property PACKAGE_PIN H17 [get_ports {vga_green[0]}]
+
+set_property PACKAGE_PIN K22 [get_ports {vga_blue[3]}]
+set_property PACKAGE_PIN K21 [get_ports {vga_blue[2]}]
+set_property PACKAGE_PIN G20 [get_ports {vga_blue[1]}]
+set_property PACKAGE_PIN H20 [get_ports {vga_blue[0]}]
+
+set_property PACKAGE_PIN M21 [get_ports {vga_hsync}]
+set_property PACKAGE_PIN L21 [get_ports {vga_vsync}]

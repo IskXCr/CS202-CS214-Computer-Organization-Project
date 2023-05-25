@@ -10,7 +10,13 @@ module top (
     input  wire [23:0] switches,
     output wire [23:0] led,
     output wire [7:0]  tube_en,
-    output wire [7:0]  tube_seg
+    output wire [7:0]  tube_seg,
+
+    output wire [3:0]  vga_red,
+    output wire [3:0]  vga_green,
+    output wire [3:0]  vga_blue,
+    output wire vga_hsync,
+    output wire vga_vsync
     // TODO: add other IO devices
     );
 
@@ -240,7 +246,12 @@ module top (
                               .switches(switches),
                               .led(led),
                               .tube_en(tube_en),
-                              .tube_seg(tube_seg)); // TODO: add other IO devices
+                              .tube_seg(tube_seg),
+                              .vga_red(vga_red),
+                              .vga_green(vga_green),
+                              .vga_blue(vga_blue),
+                              .vga_hsync(vga_hsync),
+                              .vga_vsync(vga_vsync)); // TODO: add other IO devices
 
 
     // set the source of cpu_read_data

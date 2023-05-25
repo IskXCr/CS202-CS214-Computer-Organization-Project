@@ -170,9 +170,9 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 | Segment | Offset      | Boundary    | Size        | Source                 |
 | ------- | ----------- | ----------- | ----------- | ---------------------- |
-| Text    | 0x0040_0000 | 0x0040_4000 | 16384 Words | Block Memory Generator |
-| Data    | 0x1001_0000 | 0x1001_4000 | 16384 Words | Block Memory Generator |
-| Stack   | 0x7fff_effc | 0x7fff_affc | 16384 Words | Block Memory Generator |
+| Text    | 0x0040_0000 | 0x0041_0000 | 16384 Words | Block Memory Generator |
+| Data    | 0x1001_0000 | 0x1002_0000 | 65536 Words | Block Memory Generator |
+| Stack   | 0x7fff_effc | 0x7ffe_effc | 16384 Words | Block Memory Generator |
 | MMIO    | 0xffff_0000 | 0xffff_0080 | 32 Words    | Memory-Mapped IO       |
 
 Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to get the actual address inside the block memory.
@@ -209,17 +209,19 @@ Configuration of other IO devices is tailored to meet the requirements for CS214
 
 Pin constraints work on **Minisys** platform only.
 
-| Type (I/O) | Name                  | VarName        | Destination Device | Pin  | Description                                                  |
-| ---------- | --------------------- | -------------- | ------------------ | ---- | ------------------------------------------------------------ |
-| O          | CPU Mode Indicator    |                | LED                | K17  | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
-| I          | CPU UART Mode Trigger | `uart_trigger` | Button[3]          |      | If pressed, switch CPU to UART communication mode.           |
-| I          | CPU Work Mode Trigger | `work_trigger` | Button[2]          |      | If pressed, switch CPU to work mode                          |
-| I          | Reset                 | `rst`          | Button[4]          |      | If pressed, initial an complete reset that sets CPU to **work** mode, and resets PC and GPRs to their initial values. |
-| I          | Clock Signal          | `clk`          | Wire               | Y18  | **Minisys** *built-in clock signal*.                         |
-| I          | UART_RX               | `uart_rx_i`    | Wire               | Y19  | UART input                                                   |
-| O          | UART_TX               | `uart_tx_o`    | wire               | V18  | UART output                                                  |
-| O          | UART_WEN              | `uart_wen`     | LED                | TBD  | UART write-enable signal indicator.                          |
-| O          | UART_DONE             |                | LED                | TBD  | UART transmission done indicator.                            |
+| Type (I/O) | Name                  | VarName          | Destination Device | Pin  | Description                                                  |
+| ---------- | --------------------- | ---------------- | ------------------ | ---- | ------------------------------------------------------------ |
+| I          | Clock Signal          | `clk`            | Wire               | Y18  | **Minisys** *built-in clock signal*.                         |
+| I          | UART_RX               | `uart_rx_i`      | Wire               | Y19  | UART input                                                   |
+| O          | UART_TX               | `uart_tx_o`      | wire               | V18  | UART output                                                  |
+| I          | CPU UART Mode Trigger | `uart_trigger`   | Button[3]          |      | If pressed, switch CPU to UART communication mode.           |
+| I          | CPU Work Mode Trigger | `work_trigger`   | Button[2]          |      | If pressed, switch CPU to work mode                          |
+| I          | Reset                 | `rst`            | Button[4]          |      | If pressed, initial an complete reset that sets CPU to **work** mode, and resets PC and GPRs to their initial values. |
+| O          | CPU Mode Indicator    |                  | LED[23]            |      | If `0`, CPU is in UART communication mode. Else, CPU is in work mode. |
+| O          | UART_DONE             |                  | LED[22]            |      | UART transmission done indicator.                            |
+| O          | UART_WRITE_ENABLE     | `uart_wen`       | LED[21]            |      | UART write-enable signal indicator.                          |
+| O          | INSTR_WEN             | `uart_instr_wen` | LED[20]            |      | UART instruction write-enable signal                         |
+| O          | DATA_WEN              | `uart_data_wen`  | LED[19]            |      | UART data write-enable signal                                |
 
 
 
