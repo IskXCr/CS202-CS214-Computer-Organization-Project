@@ -23,6 +23,9 @@ module top (
     wire rst_ctrl;
     assign rst_ctrl = buttons[4];
 
+
+    //////////////////////////////////////////////////
+
     // mode_ctrl
     // uart_trigger and work_trigger
     wire uart_trigger, work_trigger; // if pressed, switch to corresponding mode
@@ -53,6 +56,8 @@ module top (
     end
 
 
+    //////////////////////////////////////////////////
+
     // clk_ctrl
     wire new_clk;
     wire cpu_clk;
@@ -69,6 +74,8 @@ module top (
     // assign cpu_clk = clk;
     // assign uart_clk = clk;
 
+
+    //////////////////////////////////////////////////
 
     // setup UART
     reg  uart_rst;
@@ -105,6 +112,8 @@ module top (
                                 .upg_rx_i(upg_rx_i),
                                 .upg_tx_o(upg_tx_o));
 
+
+    //////////////////////////////////////////////////
 
     // set CPU
     reg cpu_en;
@@ -163,6 +172,8 @@ module top (
                  .overflow(overflow));
     
 
+    //////////////////////////////////////////////////
+
     // set instruction memory
     wire instr_clk;
     wire [31:0] true_instr_addr;
@@ -181,7 +192,9 @@ module top (
                            .douta(cpu_instr),
                            .wea(instr_wea));
 
-    
+
+    //////////////////////////////////////////////////
+
     // set data memory
     wire data_clk;
     wire is_in_data_seg;
@@ -203,13 +216,15 @@ module top (
                          .wea(data_wea));
     
 
+    //////////////////////////////////////////////////
+
     // set stack memory
     wire is_in_stack_seg;
     wire [31:0] stack_addr;
     wire stack_wea;
     wire [31:0] stack_out;
     
-    assign is_in_stack_seg = (cpu_mem_addr >= 32'h7ffe_effc && cpu_mem_addr <= 32'h7fff_effc);
+    assign is_in_stack_seg = (cpu_mem_addr >= 32'h7ffe_f000 && cpu_mem_addr <= 32'h7fff_effc);
     assign stack_addr = is_in_stack_seg  ? (32'h7fff_effc - cpu_mem_addr) : 32'h0000_0000; // map to address starting at 0x0
     assign stack_wea = is_in_stack_seg  && cpu_mem_write;
     
@@ -220,13 +235,15 @@ module top (
                            .wea(stack_wea));
 
 
+    //////////////////////////////////////////////////
+
     // set MMIO
     wire is_in_MMIO_seg;
     wire [31:0] MMIO_addr;
     wire MMIO_wea;
     wire [31:0] MMIO_out;
 
-    assign is_in_MMIO_seg = (cpu_mem_addr >= 32'hffff_0000 && cpu_mem_addr <= 32'hffff_0080);
+    assign is_in_MMIO_seg = (cpu_mem_addr >= 32'hffff_0000 && cpu_mem_addr <= 32'hffff_0a60);
     assign MMIO_addr = is_in_MMIO_seg ? (cpu_mem_addr - 32'hffff_0000) : 32'h0000_0000; // map to address starting at 0x0
     assign MMIO_wea = is_in_MMIO_seg && cpu_mem_write;
 
@@ -253,6 +270,8 @@ module top (
                               .vga_hsync(vga_hsync),
                               .vga_vsync(vga_vsync)); // TODO: add other IO devices
 
+
+    //////////////////////////////////////////////////
 
     // set the source of cpu_read_data
     wire [2:0] data_dst;
