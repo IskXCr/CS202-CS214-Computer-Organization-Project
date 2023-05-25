@@ -23,7 +23,7 @@ module VGA_text_cont(
     // TODO: check endianness
     reg [0:127] font_bmap [0:127]; // font_bitmap
     
-    initial $readmemb(MEM_FILE_LOC, font_bmap);
+    initial $readmemh(MEM_FILE_LOC, font_bmap);
 
     ///////////////////////////////////////////////////
     // prefetch 

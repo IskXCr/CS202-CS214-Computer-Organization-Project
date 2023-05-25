@@ -190,7 +190,7 @@ module top (
                            .addra(true_instr_addr[15:2]),
                            .dina(instr_write_data),
                            .douta(cpu_instr),
-                           .wen(instr_wen));
+                           .wea(instr_wen));
 
 
     //////////////////////////////////////////////////
@@ -213,7 +213,7 @@ module top (
                          .addra(data_addr[17:2]),
                          .dina(data_write_data),
                          .douta(data_out),
-                         .wen(data_wen));
+                         .wea(data_wen));
     
 
     //////////////////////////////////////////////////
@@ -232,7 +232,7 @@ module top (
                            .addra(stack_addr[15:2]),
                            .dina(cpu_write_data),
                            .douta(stack_out),
-                           .wen(stack_wen));
+                           .wea(stack_wen));
 
 
     //////////////////////////////////////////////////
