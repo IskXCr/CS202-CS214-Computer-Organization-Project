@@ -1,5 +1,17 @@
 # CS202/CS214 Computer Organization Project
 
+## Acknowledgements
+
+You can find acknowledgements to the sources of image/video resources and assets used under `./acknowledgements.md`.
+
+
+
+## Specification of Custom Formats
+
+You can find the specification of customized formats under `./doc` folder.
+
+
+
 ## Introduction
 
 In this project, a single-cycle MIPS CPU has been designed and tested. The CPU supports a subset of the MIPS32 ISA (without support for instructions related to exception handling, coprocessor 0 and multiplier/divider).
@@ -168,12 +180,15 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 ### Memory Specification
 
-| Segment | Offset      | Boundary    | Size        | Source                 |
-| ------- | ----------- | ----------- | ----------- | ---------------------- |
-| Text    | 0x0040_0000 | 0x0041_0000 | 16384 Words | Block Memory Generator |
-| Data    | 0x1001_0000 | 0x1002_0000 | 65536 Words | Block Memory Generator |
-| Stack   | 0x7fff_effc | 0x7ffe_effc | 16384 Words | Block Memory Generator |
-| MMIO    | 0xffff_0000 | 0xffff_0080 | 32 Words    | Memory-Mapped IO       |
+| Segment | Offset      | ITB? | Boundary    | ITB? | Size        | Source                         |
+| ------- | ----------- | ---- | ----------- | ---- | ----------- | ------------------------------ |
+| Text    | 0x0040_0000 | Y    | 0x0041_0000 | N    | 16384 Words | Block Memory Generator         |
+| Data    | 0x1001_0000 | Y    | 0x1002_0000 | N    | 65536 Words | Block Memory Generator         |
+| Stack   | 0x7fff_effc | Y    | 0x7ffe_f000 | Y    | 16384 Words | Block Memory Generator         |
+| MMIO    | 0xffff_0000 | Y    | 0xffff_0040 | N    | 16 Words    | Memory-Mapped IO Segment **1** |
+| MMIO    | 0xffff_0100 | Y    | 0xffff_0A60 | N    | 600 Words   | Memory-Mapped IO Segment **2** |
+
+*ITB*: ***Include this boundary***
 
 Block Memory addressing unit: `32 bits`. Truncate 2 bits from the processor to get the actual address inside the block memory.
 
@@ -200,6 +215,21 @@ Pin constraints only work only on *Minisys*.
 | 0xffff_0030 | R/W | 1 | LED Tube LEFT | 7-seg tube output in hex.                                  |
 | 0xffff_0034 | R/W | 1 | LED Tube RIGHT | 7-seg tube output in hex.                                  |
 | 0xffff_0038 | R/W | 1 | LED[15:0] | 16 bit LED output.                                         |
+| 0xffff_0100 | R/W | 2400 | VGA | VGA text-mode buffer. |
+
+
+
+### VGA Text Mode Specification
+
+| Variable                     | Value | Description |
+| ---------------------------- | ----- | ----------- |
+| `text_width`                 | 8     |             |
+| `text_height`                | 16    |             |
+| `horizontal_character_count` | 80    |             |
+| `vertical_character_count`   | 30    |             |
+| `total_character_count`      | 2400  |             |
+
+
 
 
 
