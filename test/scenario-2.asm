@@ -11,8 +11,6 @@ main:
     lui $28, 0xffff
     ori $28, $28, 0x0000
 
-    # 0xC60($28) LED
-    # 0xC9C($28) segtube
     lw $t0, 0x08($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits    
 
@@ -214,7 +212,7 @@ end_subtraction:
 test_110:
     lw $t0, 0x0C($28)
     addi $t2, $t0, 0
-    lw $t1, 0x0C($28)
+    lw $t0, 0x0C($28)
     addi $t3, $t0, 0
 
     mult $t2, $t3 
@@ -226,7 +224,7 @@ test_110:
 test_111:
     lw $t0, 0x0C($28)
     addi $t2, $t0, 0
-    lw $t1, 0x0C($28)
+    lw $t0, 0x0C($28)
     addi $t3, $t0, 0
     div $t2, $t3 
     mfhi $t5 
