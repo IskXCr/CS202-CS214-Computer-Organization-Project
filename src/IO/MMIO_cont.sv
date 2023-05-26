@@ -197,10 +197,10 @@ module MMIO_cont(
 
     always_ff @(posedge data_clk, posedge rst) begin
         if (rst) begin
-            mmio_regs[14] = 32'h0000_0000;
+            mmio_regs[14] <= 32'h0000_0000;
         end
         else begin
-            mmio_regs[14] = led_seg_wen_2 ? write_data : mmio_regs[14];
+            mmio_regs[14] <= led_seg_wen_2 ? write_data : mmio_regs[14];
         end
     end
 
