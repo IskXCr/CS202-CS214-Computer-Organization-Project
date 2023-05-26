@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module cpu_reset_sim();
+module CPU_reset_sim();
 
     reg [4:0] buttons = 5'b00000;
     reg [23:0] switches = 24'h00_001A;

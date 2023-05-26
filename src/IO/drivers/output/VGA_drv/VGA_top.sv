@@ -23,7 +23,9 @@ module VGA_top(
     ///////////////////////////////////////////////////
     // VGA driver clk generation
     wire dri_clk; // VGA driver clock at 25.175 MHz for 480p
-    clk_wiz_1 clk_gen(.clk_in1(fpga_clk), .clk_out1(dri_clk), .reset(1'b0));
+    clk_wiz_1 vga_dri_clk_gen(.clk_in1(fpga_clk), 
+                              .clk_out1(dri_clk), 
+                              .reset(1'b0));
 
 
     ///////////////////////////////////////////////////
@@ -60,9 +62,8 @@ module VGA_top(
                               .dina(write_data),
                               .douta(read_data),
                               .wea(wen),
-
                               .addrb(cont_buf_addr),
-                              .clkb(dri_clk),
+                              .clkb(~dri_clk),
                               .dinb(32'h0000_0000),
                               .doutb(cont_buf_data),
                               .web(1'b0));
@@ -80,6 +81,6 @@ module VGA_top(
                            .hsync(hsync),
                            .vsync(vsync),
                            .pos_x(sgn_pos_x),
-                           .pos_y(sng_pos_y));
+                           .pos_y(sgn_pos_y));
 
 endmodule

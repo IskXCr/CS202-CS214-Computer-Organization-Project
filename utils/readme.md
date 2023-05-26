@@ -17,4 +17,8 @@ Please refer to [ascgen2's official website](http://sourceforge.net/projects/asc
 
 ## Font Generator
 
-`font_gen/bin2memh.py`: Convert font from binary bitmap format (used by VGA BIOS) to a `memh` file. Conversion can only be done on `8*16` fonts. However, you may modify the parameters to suit your need.
+`font_gen/bin2coe.py`: Convert font from binary bitmap format (used by VGA BIOS) to a `coe` file loaded into a block memory generator. Currently, conversion can only be done on `8*16` fonts. However, you may modify the parameters to suit your need.
+
+## Video Encoder
+
+`savf_conv/savf_encoder`: Convert an ASCII video into a byte stream encoded using Huffman code.

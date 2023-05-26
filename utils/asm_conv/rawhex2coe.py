@@ -14,20 +14,16 @@ if __name__ == "__main__":
     with open(file, "r") as f:
         lines = f.readlines()
     new_file = file.removesuffix(".asm").removesuffix(".txt").removesuffix(".raw") + ".coe"
+
     with open(new_file, "w") as f:
         f.write("memory_initialization_radix = 16;\n")
         f.write("memory_initialization_vector =\n")
-        cnt = 0
-        for line in lines:
-            res = line.strip()
-            if len(res) == 0:
-                continue
-            f.write(res + ",\n")
-            cnt += 1
-            if cnt >= cmd_args.size:
-                break
+        lines = list(map(lambda x: x.strip(), lines))[:cmd_args.size]
+        cnt = len(lines)
+        f.write(',\n'.join(lines))
 
         if cnt < cmd_args.size:
+            f.write(",\n")
             for i in range(cmd_args.size - cnt):
                 f.write("00000000,\n")
 

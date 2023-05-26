@@ -118,7 +118,7 @@ module top (
     // set CPU
     reg cpu_en;
     reg cpu_rst;
-    reg [31:0] cpu_en_cnt;
+    reg [31:0] cpu_en_cnt; // delayed enable
 
     always_ff @(posedge fpga_clk, posedge rst_ctrl) begin
         if (rst_ctrl) begin
@@ -204,13 +204,13 @@ module top (
     wire data_wen;
     
     assign data_clk = mode_ctrl ? ~cpu_clk : uart_write_clk;
-    assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h1002_0000);
+    assign is_in_data_seg = (cpu_mem_addr >= 32'h1001_0000 && cpu_mem_addr < 32'h1007_0000);
     assign data_addr = mode_ctrl ? (is_in_data_seg ? (cpu_mem_addr - 32'h1001_0000) : 32'h0000_0000) : {16'h0000, uart_write_addr, 2'b00}; // map to address starting at 0x0
     assign data_write_data = mode_ctrl ? cpu_write_data : uart_write_data;
     assign data_wen = mode_ctrl ? (is_in_data_seg && cpu_mem_write) : (uart_write_target && uart_wen);
     
     data_mem data_memory(.clka(data_clk),
-                         .addra(data_addr[17:2]),
+                         .addra(data_addr[18:2]),
                          .dina(data_write_data),
                          .douta(data_out),
                          .wea(data_wen));

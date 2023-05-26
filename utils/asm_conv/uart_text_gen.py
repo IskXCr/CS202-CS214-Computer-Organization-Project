@@ -10,12 +10,8 @@ def coe2raw(file_name: str) -> list:
 
 
 def write_to_file(f, lines, size):
-    cnt = 0
-    for line in lines:
-        f.write(line)
-        cnt += 1
-        if cnt >= size:
-            break
+    f.writelines(lines)
+    cnt = len(lines)
     if cnt < size:
         for _ in range(size - cnt):
             f.write("00000000")
