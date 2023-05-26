@@ -66,7 +66,7 @@ loop_8bit:
     bne $t3, $t4, loop_8bit
 
     andi $t6, $t2, 1
-    sw $t2, 0x2C($28)
+    sw $t6, 0x2C($28)
     j end_program
 
 # t1 the value of a
