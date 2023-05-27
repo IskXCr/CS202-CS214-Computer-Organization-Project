@@ -26,15 +26,23 @@ main:
 test_000:
     # sw[15:8] t0 - a
     lw $t0, 0x0C($28)
-    jal signed_extension
+    sw $t0, 0x30($28)
+    # jal signed_extension
     li $t1, 0 
     li $t2, 0
     # if the input is negative
-    bgez $t0, loop
+    slt $t3, $t0, $zero
+    beq $t3, 1, loop
 loop_light:    
     # LED[16] bling
     li $t2, 1
     sw $t2, 0x2C($28)
+    lui $26, 0x000F
+    ori $26, $26, 0x79E0
+    li $27, 0
+loop_delay0:
+    addi $27, $27, 1
+    bne $27, $26, loop_delay0
     li $t2, 0
     sw $t2, 0x2C($28)
     j loop_light
@@ -54,7 +62,7 @@ test_001:
     lw $t0, 0x0C($28) # value of a
     li $t2, 0  # the sum
     li $t3, 0  # number of push and pop
-    jal sum
+    jal sum_recursive
     # sw $t2, 0x2C($28) # the sum
     # sw $t2, 0x24($28)
     sw $t3, 0x38($28) # LED Tube RIGHT 
@@ -92,6 +100,12 @@ sum:
 
     sw $a0, 0x38($28)
     sw $a0, 0x34($28)
+    lui $26, 0x00AF
+    ori $26, $26, 0x79E0
+    li $27, 0
+loop_delay2: # print and stop for 2s
+    addi $27, $27, 1
+    bne $27, $26, loop_delay2
     sll $zero, $zero, 2 # print and stop for 2s
     slti $t0, $a0, 1
     beq $t0, $zero, Base_case2 
@@ -127,16 +141,21 @@ Base_case3:
     lw $ra, 4($sp)
     sw $a0, 0x38($28)
     sw $a0, 0x34($28)
-    sll $zero, $zero, 2 # stop for 2s
+    lui $26, 0x00AF
+    ori $26, $26, 0x79E0
+    li $27, 0
+loop_delay3: # print and stop for 2s
+    addi $27, $27, 1
+    bne $27, $26, loop_delay3
     addi $sp, $sp, 8
     jr $ra
 
 test_100:
     lw $t0, 0x0C($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t2, $t0, 0 # a 
     lw $t0, 0x10($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t3, $t0, 0 # b
     add $t4, $t2, $t3 # sum 
     # t5, t6, t7- signed of a, b, a + b
@@ -157,10 +176,10 @@ end_addition:
 
 test_101:
     lw $t0, 0x0C($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t2, $t0, 0 # a
     lw $t0, 0x10($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t3, $t0, 0 # b
     sub $t4, $t2, $t3
     # t5, t6, t7- signed of a, b, a - b
@@ -181,10 +200,10 @@ end_subtraction:
 
 test_110:
     lw $t0, 0x0C($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t2, $t0, 0 # a
     lw $t0, 0x10($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t3, $t0, 0 # b
 
     mult $t2, $t3 
@@ -194,10 +213,10 @@ test_110:
 
 test_111:
     lw $t0, 0x0C($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t2, $t0, 0 # a
     lw $t0, 0x10($28)
-    jal signed_extension
+    # jal signed_extension
     addi $t3, $t0, 0 # b
 
     div $t2, $t3 
@@ -214,6 +233,13 @@ Test_111_loop:
     addi $t6, $t2, 0
 Test_111_loop2:
     sw $t6, 0x38($28)
+
+    lui $26, 0x01AF
+    ori $26, $26, 0x79E0
+    li $27, 0
+loop_delay4: # print and stop for 2s
+    addi $27, $27, 1
+    bne $27, $26, loop_delay4
     beq $t5, 100, end_program
     j Test_111_loop
 
@@ -222,7 +248,6 @@ end_program:
 
 signed_extension:
     slti $t1, $t0, 128
-    sll $zero, $zero, 5 # delay for 5 seconds
     beq $t1, 0, end_signed_extension
     or $t0, $t0, 65280
 end_signed_extension:

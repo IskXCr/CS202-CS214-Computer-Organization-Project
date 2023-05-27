@@ -9,8 +9,6 @@ main:
     ori $28, $28, 0x0000
 
 loop_0:
-    lw $s7, 0x08($28)
-    bne $s7, $zero, loop_0
     # get the testcase sw[22:20]
     lw $t0, 0x08($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits
@@ -72,7 +70,7 @@ loop_8bit:
 # t2 the value of b
 
 test1_010:
-    jal test_111
+    jal test1_111
     # not(a|b)
     or $t3, $t1, $t2
     not $t3, $t3
@@ -82,7 +80,7 @@ test1_010:
     j end_program
 
 test1_011:
-    jal test_111
+    jal test1_111
     # (a|b)
     or $t3, $t1, $t2
     sw $t3, 0x38($28)
@@ -90,7 +88,7 @@ test1_011:
     j end_program
 
 test1_100:
-    jal test_111
+    jal test1_111
     # (a^b)
     xor $t3, $t1, $t2
     sw $t3, 0x38($28)
@@ -98,14 +96,14 @@ test1_100:
     j end_program
 
 test1_101:
-    jal test_111
+    jal test1_111
     sltu $t3, $t1, $t2
     # show the result in LED[16]
     sw $t3, 0x2c($28)
     j end_program
 
 test1_110:
-    jal test_111
+    jal test1_111
     slt $t3, $t1, $t2
     # show the result in LED[16]
     sw $t3, 0x2c($28)
