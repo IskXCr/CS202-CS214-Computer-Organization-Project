@@ -98,17 +98,17 @@ module MMIO_cont(
     assign unsigned_op2 = {24'h00_0000, switches[7:0]};
 
     always_comb begin
-        mmio_regs[3] = op_comb[0] ? signed_op1 : unsigned_op1;
-        mmio_regs[4] = op_comb[1] ? signed_op2 : unsigned_op2;
+        mmio_regs[3] = op_comb[1] ? signed_op1 : unsigned_op1;
+        mmio_regs[4] = op_comb[0] ? signed_op2 : unsigned_op2;
     end
 
     always_comb begin
         casez (testcase)
             4'b00??: op_comb = 2'b00;
             4'b010?: op_comb = 2'b00;
-            4'b0110: op_comb = 2'b10;
+            4'b0110: op_comb = 2'b11;
             4'b0111: op_comb = 2'b00;
-            4'b1000: op_comb = 2'b10;
+            4'b1000: op_comb = 2'b00;
             4'b10??: op_comb = 2'b00;
             4'b11??: op_comb = 2'b11;
         endcase
