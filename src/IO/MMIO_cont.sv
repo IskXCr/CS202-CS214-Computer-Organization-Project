@@ -108,7 +108,7 @@ module MMIO_cont(
             4'b010?: op_comb = 2'b00;
             4'b0110: op_comb = 2'b11;
             4'b0111: op_comb = 2'b00;
-            4'b1000: op_comb = 2'b00;
+            4'b1000: op_comb = 2'b11;
             4'b10??: op_comb = 2'b00;
             4'b11??: op_comb = 2'b11;
         endcase

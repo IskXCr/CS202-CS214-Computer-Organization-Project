@@ -216,7 +216,7 @@ Pin constraints only work only on *Minisys*.
 | 0xffff_0034 | R/W | 1 | LED Tube RIGHT | 7-seg tube output in hex.                                  |
 | 0xffff_0038 | R/W | 1 | Buzzer | Stores the vibrating frequency of the buzzer. |
 | 0xffff_0038 | R/W | 1 | LED[15:0] | 16 bit LED output.                                         |
-| 0xffff_0100 | R/W | 2400 | VGA | VGA text-mode buffer. |
+| 0xffff_0100 | R/W | 600         | VGA | VGA text-mode buffer. |
 
 
 
