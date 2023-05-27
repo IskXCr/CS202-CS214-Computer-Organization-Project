@@ -2,5 +2,7 @@
 imgs
 img_convd
 
-.png
-.txt
+*.png
+*.txt
+*.mp4
+*.ttf

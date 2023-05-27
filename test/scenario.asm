@@ -12,8 +12,6 @@ main:
 
 case1:
 loop_0:
-    lw $s7, 0x08($28)
-    bne $s7, $zero, loop_0
     # get the testcase sw[22:20]
     lw $t0, 0x08($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits
