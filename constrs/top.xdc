@@ -2,6 +2,9 @@
 set_property IOSTANDARD LVCMOS33 [get_ports *]
 
 set_property PACKAGE_PIN Y18 [get_ports fpga_clk]
+create_clock -period 10 [get_ports fpga_clk]
+set_input_delay -clock fpga_clk 2 [get_ports upg_rx_i]
+set_output_delay -clock fpga_clk 2 [get_ports upg_tx_o]
 
 set_property PACKAGE_PIN Y19 [get_ports upg_rx_i]
 set_property PACKAGE_PIN V18 [get_ports upg_tx_o]
