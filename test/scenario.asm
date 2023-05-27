@@ -320,34 +320,96 @@ test_110:
     # jal signed_extension
     addi $t2, $t0, 0 # a
     lw $t0, 0x10($28)
-    # jal signed_extension
     addi $t3, $t0, 0 # b
-
-    mult $t2, $t3 
-    mflo $t4
+    slt $t5, $t2, $zero
+    beq $t5, 0, positive_a
+    subu $t2, $zero, $t2
+    addu $t2, $t2, 256
+positive_a:
+    slt $t6, $t3, $zero
+    beq $t6, 0, positive_b
+    subu $t3, $zero, $t3
+    addu $t3, $t3, 256
+positive_b:
+    xor $t5, $t5, $t6
+    li $t4, 0
+    li $a0, 0
+    li $a1, 8
+loop:
+    li $s1, 1
+    and $s2, $s1, $t3
+    beq $s2, $0, jumpAdd
+    add $t4, $t2, $t4
+jumpAdd:
+    sll $t2, $t2, 1
+    srl $t3, $t3, 1
+    addi $a0, $a0, 1
+    blt $a0, $a1, loop
+    beq $t5, 0, positive
+    not $t4, $t4
+    addi $t4, $t4, 1
+positive:
+    sw $t5, 0x2c($28) # show if the result is negative or not
     sw $t4, 0x34($28)
     sw $t4, 0x38($28)
 
 test_111:
-    lw $t0, 0x0C($28)
+    lw $t0, 0x0C($28) 
     # jal signed_extension
-    addi $t2, $t0, 0 # a
+    addi $t1, $t0, 0 # a 
+    slt $t5, $t1, $zero
+    beq $t5, 0, positive_div_a
+    subu $t1, $zero, $t1
+    addu $t1, $t1, 256
+positive_div_a:
     lw $t0, 0x10($28)
     # jal signed_extension
-    addi $t3, $t0, 0 # b
-
-    div $t2, $t3 
-    mflo $t4 # quotient
-    mult $t3, $t4
-    mflo $t3
-    sub $t2, $t2, $t3 # remainder
+    addi $t2, $t0, 0 # b
+    slt $t6, $t2, $zero
+    beq $t6, 0, positive_div_b 
+    subu $t2, $zero, $t2
+    addu $t2, $t2, 256
+positive_div_b:
+    xor $t7, $t6, $t5 #check the sign
+    sll $t2, $t2, 8
+    addi $t3, $t1, 0 #t3 remainder
+    li $t4, 0 #t4 quot
+    li $t0, 0
+    li $v0, 9
+    li $a0, 0x1000
+loopb:
+# $t1: dividend, $t2: divisor, $t3: remainder, $t4: quot
+# $a0: 0x8000, $v0: 5
+    sub $t3,$t3,$t2 #dividend - dividor
+    and $s0,$t3,$a0 # get the higest bit of rem to check if rem<0
+    sll $t4,$t4,1 # shift left quot with 1bit
+    beq $s0,$0, SdrUq # if rem>=0, shift Div right
+    add $t3,$t3,$t2 # if rem<0, rem=rem+div
+    srl $t2,$t2,1
+    addi $t4,$t4,0
+    j loope
+    SdrUq:
+    srl $t2,$t2,1
+    addi $t4,$t4,1
+    loope:
+    addi $t0,$t0,1
+    bne $t0,$v0,loopb
+    beq $t7, 0, positive_quot
+    not $t4, $t4
+    addi $t4, $t4, 1 
+positive_quot:
+    beq $t5, 0, positive_rem
+    not $t3, $t3
+    addi $t3, $t3, 1    
+positive_rem:
     li $t5, 0
+
 Test_111_loop:
     addi $t5, $t5, 1
-    addi $t6, $t4, 0
+    addi $t6, $t3, 0
     andi $t7, $t5, 1
     beq $t7, 1, Test_111_loop2
-    addi $t6, $t2, 0
+    addi $t6, $t4, 0
 Test_111_loop2:
     sw $t6, 0x38($28)
 
