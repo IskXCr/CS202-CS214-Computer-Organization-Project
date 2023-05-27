@@ -17,6 +17,27 @@ def write_to_file(f, lines, size):
             f.write("00000000")
 
 
+def uart_text_gen(text, data, size: int = 16384, new_file: str = "uart_output.txt"):
+    '''
+    :param: text: path to text file
+    :param: data: path to data file
+    :param: size: maximum allowed size for each segment (text or data)
+    :param: new_file: path to output
+    '''
+    text_lines = coe2raw(text)
+    data_lines = coe2raw(data)
+
+    with open(new_file, "w") as f:
+        f.write("03020000")
+        write_to_file(f, text_lines, size)
+        write_to_file(f, data_lines, size)
+
+    print(f'Text:\t"{text}"')
+    print(f'Data:\t"{data}"')
+    print(f'Dst:\t"{new_file}"')
+    print(f'Transformed {size * 2} lines.')
+
+
 if __name__ == "__main__":
     argParser = argparse.ArgumentParser()
     argParser.add_argument(
@@ -28,18 +49,5 @@ if __name__ == "__main__":
     argParser.add_argument(
         "-s", "--size", help="size of each segment in words (32 bit). Default to 16384.", type=int, default=16384)
     cmd_args = argParser.parse_args()
-
-    text_lines = coe2raw(cmd_args.text)
-    data_lines = coe2raw(cmd_args.data)
-    size = cmd_args.size
-
-    new_file = cmd_args.output
-    with open(new_file, "w") as f:
-        f.write("03020000")
-        write_to_file(f, text_lines, size)
-        write_to_file(f, data_lines, size)
-
-    print(f'Text:\t"{cmd_args.text}"')
-    print(f'Data:\t"{cmd_args.data}"')
-    print(f'Dst:\t"{new_file}"')
-    print(f'Transformed {size * 2} lines.')
+    
+    uart_text_gen(cmd_args.text, cmd_args.data, cmd_args.size, cmd_args.output)

@@ -12,8 +12,6 @@ module CPU_sim();
     initial begin
         #500 buttons[4] = 1;
         #500 buttons[4] = 0;
-        #6000 buttons[4] = 1;
-        #6500 buttons[4] = 0;
     end
     
     initial begin

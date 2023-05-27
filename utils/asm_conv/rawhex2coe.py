@@ -1,15 +1,6 @@
 import argparse
 
-if __name__ == "__main__":
-    argParser = argparse.ArgumentParser()
-    argParser.add_argument(
-        "file", help="path to file be parsed. The file must be dumped out by MARS in \"Hexadecimal Text\" format.", type=str)
-    argParser.add_argument(
-        "-s", "--size", help="maximum length of the output file in words (32 bit). Default to 16384.", type=int, default=16384)
-    cmd_args = argParser.parse_args()
-
-    file: str = cmd_args.file
-    
+def rawhex2coe(file, size):
     lines = []
     with open(file, "r") as f:
         lines = f.readlines()
@@ -30,3 +21,14 @@ if __name__ == "__main__":
 
     print(f'Src: "{file}"\nDst: "{new_file}"')
     print(f'Transformed {cnt} lines.')
+
+
+if __name__ == "__main__":
+    argParser = argparse.ArgumentParser()
+    argParser.add_argument(
+        "file", help="path to file be parsed. The file must be dumped out by MARS in \"Hexadecimal Text\" format.", type=str)
+    argParser.add_argument(
+        "-s", "--size", help="maximum length of the output file in words (32 bit). Default to 16384.", type=int, default=16384)
+    cmd_args = argParser.parse_args()
+    
+    rawhex2coe(cmd_args.file, cmd_args.size)

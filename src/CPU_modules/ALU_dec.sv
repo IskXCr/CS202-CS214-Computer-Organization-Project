@@ -37,7 +37,7 @@ module ALU_dec (
 
                 // arithmetic
                 6'b10000?: ALU_control = 4'h7;
-                6'b10?01?: ALU_control = 4'h8;
+                6'b10001?: ALU_control = 4'h8;
                 6'b10101?: ALU_control = 4'h9;
 
                 default:   ALU_control = 4'h0;
