@@ -41,7 +41,9 @@ Frames are of two categories:
 | Key Frame   | [**K**] | 0    | Key frame that is followed by a list of mapping entries and captures the entire frame in compressed format |
 | Delta Frame | [**D**] | 1    | Delta frame that modifies the previous frame to generate a new frame |
 
-**Each frame must be aligned on a 32-bit boundary. The byte-order is little-endian.**
+**Each frame must be aligned on a 32-bit boundary.**
+
+The byte order is *little-endian*, following the convention of MARS and the toolsets included in this repository.
 
 ```
 31 (MSB)                     (LSB) 0
@@ -54,12 +56,12 @@ Frames are of two categories:
 
 #### 1. Key Frame
 
-##### Key Frame Header:  (16 bit)
+##### Key Frame Header:  (32 bit)
 
 | Bit Offset (LSB) | Boundary | Type      | Description                                           |
 | ---------------- | -------- | --------- | ----------------------------------------------------- |
-| 15               | 15       | Key Frame | `0` for **K** and `1` for **D**                       |
-| 0                | 14       | Reserved  | Must be `0`. If full `1`, then this is the last frame |
+| 31               | 31       | Key Frame | `0` for **K** and `1` for **D**                       |
+| 0                | 30       | Reserved  | Must be `0`. If full `1`, then this is the last frame |
 
 
 
@@ -70,7 +72,7 @@ Frames are of two categories:
 | Bit Offset (LSB) | Boundary | Type               | Description                                                  |
 | ---------------- | -------- | ------------------ | ------------------------------------------------------------ |
 | 15               | 15       | Key Frame          | `0` for **K** and `1` for **D**                              |
-| 0                | 14       | #Delta Entry Count | Number of entries that records a modification to the previous frame. If `0` then this frame completely the same as the previous one |
+| 0                | 14       | #Delta Entry Count | Number of entries that records a modification to the previous frame. If `0` then this frame completely the same as the previous one. |
 
 
 

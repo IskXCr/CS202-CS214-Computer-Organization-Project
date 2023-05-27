@@ -71,7 +71,7 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
     wire [31:0] ALU_op1, ALU_op2, ALU_out;
     wire [3:0] ALU_control;
     wire [4:0] shamt;
-    wire shift_src, shift_dir, shift_ari, do_unsigned;
+    wire shift_src, shift_dir, shift_ari, do_unsigned, ALU_reg_write, ALU_reg_sel;
 
     wire ALU_lt, ALU_eq, ALU_overflow;
     assign overflow = ALU_overflow;
@@ -126,6 +126,8 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
                         .do_unsigned(do_unsigned),
                         .ALU_src(ALU_src),
                         .use_sign_imm(use_sign_imm),
+                        .ALU_reg_write(ALU_reg_write),
+                        .ALU_reg_sel(ALU_reg_sel),
                         .ALU_control(ALU_control));
 
     // register part
@@ -175,11 +177,15 @@ module CPU #(parameter TEXT_BASE_ADDR = 32'h0040_0000) (
                             .sel(shift_src),
                             .q(shamt));
 
-    ALU ALU_inst(.ALU_control(ALU_control), 
+    ALU ALU_inst(.clk(clk),
+                 .rst(rst),
+                 .ALU_control(ALU_control), 
                  .shamt(shamt),
                  .shift_dir(shift_dir),
                  .shift_ari(shift_ari),
                  .do_unsigned(do_unsigned),
+                 .ALU_reg_write(ALU_reg_write),
+                 .ALU_reg_sel(ALU_reg_sel),
                  .op_1(ALU_op1),
                  .op_2(ALU_op2),
                  .ALU_eq(ALU_eq),
