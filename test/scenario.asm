@@ -149,19 +149,25 @@ test_000:
     li $t2, 0
     # if the input is negative
     slt $t3, $t0, $zero
-    beq $t3, 1, loop
+    beq $t3, 1, loop_light
+    j loop
 loop_light:    
     # LED[16] bling
     li $t2, 1
     sw $t2, 0x2C($28)
-    lui $26, 0x000F
-    ori $26, $26, 0x79E0
+    li $26, 0x4C4B40
     li $27, 0
 loop_delay0:
     addi $27, $27, 1
     bne $27, $26, loop_delay0
+    
     li $t2, 0
     sw $t2, 0x2C($28)
+    
+    li $27, 0
+loop_delay_tlbc3a:
+    addi $27, $27, 1
+    bne $27, $26, loop_delay_tlbc3a
     j loop_light
 loop:
     # $t2 - sum   $t1 from 1 to $t0
@@ -172,6 +178,7 @@ loop:
     sw $t2, 0x34($28) # seg output RIGHT
     
     j end_program
+
 
 
 
@@ -217,8 +224,7 @@ sum:
 
     sw $a0, 0x38($28)
     sw $a0, 0x34($28)
-    lui $26, 0x00AF
-    ori $26, $26, 0x79E0
+    li $26, 0x4C4B40
     li $27, 0
 loop_delay2: # print and stop for 2s
     addi $27, $27, 1
@@ -258,8 +264,7 @@ Base_case3:
     lw $ra, 4($sp)
     sw $a0, 0x38($28)
     sw $a0, 0x34($28)
-    lui $26, 0x00AF
-    ori $26, $26, 0x79E0
+    li $26, 0x4C4B40
     li $27, 0
 loop_delay3: # print and stop for 2s
     addi $27, $27, 1
@@ -412,8 +417,7 @@ Test_111_loop:
 Test_111_loop2:
     sw $t6, 0x38($28)
 
-    lui $26, 0x01AF
-    ori $26, $26, 0x79E0
+    li $26, 0x8C4B40
     li $27, 0
 loop_delay4: # print and stop for 2s
     addi $27, $27, 1
