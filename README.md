@@ -128,6 +128,12 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 |       |            |
 |       |            |
 |       |            |
+| *mul  | A          |
+| *div  | B          |
+| *mfhi | C          |
+| *mflo | D          |
+| *mthi | E          |
+| *mtlo | F          |
 
 
 

@@ -3,7 +3,7 @@
 module CPU_sim();
 
     reg [4:0] buttons = 5'b00000;
-    reg [23:0] switches = 24'h00_001A;
+    reg [23:0] switches = 24'hf0_fdff;
     wire [23:0] led;
     wire [7:0] tube_en, tube_seg;
     

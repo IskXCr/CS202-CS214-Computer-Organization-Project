@@ -1,11 +1,17 @@
 `timescale 1ns/1ps
 
 module ALU (
+    input  wire clk,
+    input  wire rst,
+
     input  wire [3:0] ALU_control, // ALU internal control code
     input  wire [4:0] shamt,              // shift amount
     input  wire shift_dir,          // 1 for right shift
     input  wire shift_ari,          // 1 for arithmetic shift
     input  wire do_unsigned,        // 1 to do unsigned operation
+
+    input  wire ALU_reg_write,     // 1 to let ALU write results into hi/lo register
+    input  wire ALU_reg_sel,       // 0 for selecting the hi register, 1 for selecting the lo register
 
     input  wire [31:0] op_1,
     input  wire [31:0] op_2,
@@ -18,7 +24,12 @@ module ALU (
 
     // wires and regs
     wire [31:0] shift_res;
-    reg  [31:0] op_res;    // intermediate arithmetic results other than op shift
+
+    wire [63:0] mul_res;
+    wire [31:0] div_quot, div_rem; // quotient and remainder, as suggested
+    reg  [31:0] hi, lo;            // hi and lo register
+
+    reg  [31:0] op_res;            // intermediate arithmetic results other than op shift and mul/div
 
     // module instances
     shifter shifter_0(.d(op_2), 
@@ -26,6 +37,35 @@ module ALU (
                       .dir(shift_dir), 
                       .ari(shift_ari), 
                       .q(shift_res));
+
+    // mul/div
+    assign mul_res  = (do_unsigned) ? (op_1 * op_2) : ($signed(op_1) * $signed(op_2));
+    assign div_quot = (do_unsigned) ? (op_1 / op_2) : ($signed(op_1) / $signed(op_2));
+    assign div_rem  = (do_unsigned) ? (op_1 % op_2) : ($signed(op_1) % $signed(op_2));
+
+    // manipulate hi/lo registers
+    always_ff @(posedge clk, posedge rst) begin
+        if (rst) begin
+            hi <= 32'h0000_0000;
+            lo <= 32'h0000_0000;
+        end
+        else begin
+            case (ALU_control)
+                4'hA: begin
+                    hi <= mul_res[63:32];
+                    lo <= mul_res[31:0];
+                end
+                4'hB: begin
+                    hi <= div_rem;
+                    lo <= div_quot;
+                end
+                default: begin
+                    hi <= (ALU_reg_write && ~ALU_reg_sel) ? op_1 : hi;
+                    lo <= (ALU_reg_write && ALU_reg_sel) ? op_1 : lo;
+                end
+            endcase
+        end
+    end
 
     // op_res
     always_comb begin
@@ -47,6 +87,7 @@ module ALU (
         case (ALU_control)
             4'h6: ALU_out = shift_res;
             4'h9: ALU_out = {31'd0, ALU_lt};
+            4'hC: ALU_out = (ALU_reg_sel) ? lo : hi;
             default: ALU_out = op_res;
         endcase
     end
