@@ -8,8 +8,7 @@
 
 main:
     # $28 0xffff0000
-    lui $28, 0xffff
-    ori $28, $28, 0x0000
+    li $28, 0xffff0000
     # testcase number
     lw $t0, 0x08($28)
     andi $t0, $t0, 0x07 # get the lower 3 bits    
@@ -33,12 +32,12 @@ test_000:
     # if the input is negative
     slt $t3, $t0, $zero
     beq $t3, 1, loop
+    j loop
 loop_light:    
     # LED[16] bling
     li $t2, 1
     sw $t2, 0x2C($28)
-    lui $26, 0x000F
-    ori $26, $26, 0x79E0
+    li $26, 0x02FAF080
     li $27, 0
 loop_delay0:
     addi $27, $27, 1
