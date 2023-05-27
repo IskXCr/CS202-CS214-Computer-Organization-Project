@@ -379,7 +379,6 @@ positive_div_b:
     li $a0, 0x1000
 loopb:
 # $t1: dividend, $t2: divisor, $t3: remainder, $t4: quot
-# $a0: 0x8000, $v0: 5
     sub $t3,$t3,$t2 #dividend - dividor
     and $s0,$t3,$a0 # get the higest bit of rem to check if rem<0
     sll $t4,$t4,1 # shift left quot with 1bit
