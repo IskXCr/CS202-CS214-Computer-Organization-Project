@@ -277,13 +277,12 @@ test_100:
     # jal signed_extension
     addi $t2, $t0, 0 # a 
     lw $t0, 0x10($28)
-    # jal signed_extension
     addi $t3, $t0, 0 # b
     add $t4, $t2, $t3 # sum 
     # t5, t6, t7- signed of a, b, a + b
-    slt $t5, $t2, $zero
-    slt $t6, $t3, $zero
-    slt $t7, $t4, $zero
+    sltiu $t5, $t2, 128
+    sltiu $t6, $t3, 128
+    sltiu $t7, $t4, 128
     li $s0, 0 # overflow
     bne $t5, $t6, end_addition
     beq $t6, $t7, end_addition
@@ -305,9 +304,9 @@ test_101:
     addi $t3, $t0, 0 # b
     sub $t4, $t2, $t3
     # t5, t6, t7- signed of a, b, a - b
-    slt $t5, $t2, $zero
-    slt $t6, $t3, $zero
-    slt $t7, $t4, $zero
+    sltiu $t5, $t2, 128
+    sltiu $t6, $t3, 128
+    sltiu $t7, $t4, 128
     li $s0, 0 # overflow
     bne $t5, $t6, end_subtraction
     beq $t6, $t7, end_subtraction
@@ -324,17 +323,27 @@ test_110:
     lw $t0, 0x0C($28)
     # jal signed_extension
     addi $t2, $t0, 0 # a
+    sw $t2, 0x30($28)
     lw $t0, 0x10($28)
     addi $t3, $t0, 0 # b
-    slt $t5, $t2, $zero
-    beq $t5, 0, positive_a
-    subu $t2, $zero, $t2
-    addu $t2, $t2, 256
+    sw $t3, 0x34($28)
+    sltiu $t5, $t2, 128
+    beq $t5, 1, positive_a
+    # subu $t2, $zero, $t2
+    # addu $t2, $t2, 256
+    # ori $t2, $t2, 0xffffff00
+    not $t2, $t2
+    # xori $t2, $t2, 0xff
+    addi $t2, $t2, 1
 positive_a:
-    slt $t6, $t3, $zero
-    beq $t6, 0, positive_b
-    subu $t3, $zero, $t3
-    addu $t3, $t3, 256
+    sltiu $t6, $t3, 128
+    beq $t6, 1, positive_b
+    # ori $t3, $t3, 0xffffff00
+    not $t3, $t3
+    # xori $t3, $t3, 0xff
+    addi $t3, $t3, 1
+    # subu $t3, $zero, $t3
+    # addu $t3, $t3, 256
 positive_b:
     xor $t5, $t5, $t6
     li $t4, 0
@@ -357,24 +366,35 @@ positive:
     sw $t5, 0x2c($28) # show if the result is negative or not
     sw $t4, 0x34($28)
     sw $t4, 0x38($28)
+    j end_program
 
 test_111:
     lw $t0, 0x0C($28) 
     # jal signed_extension
     addi $t1, $t0, 0 # a 
-    slt $t5, $t1, $zero
-    beq $t5, 0, positive_div_a
-    subu $t1, $zero, $t1
-    addu $t1, $t1, 256
+    sltiu $t5, $t1, 128
+    sw $t5, 0x20($28)
+    beq $t5, 1, positive_div_a
+    #nop
+    not $t1, $t1
+    # nop
+    # xori $t1, $t1, 0xff
+    addi $t1, $t1, 1
+
 positive_div_a:
     lw $t0, 0x10($28)
     # jal signed_extension
     addi $t2, $t0, 0 # b
-    slt $t6, $t2, $zero
-    beq $t6, 0, positive_div_b 
-    subu $t2, $zero, $t2
-    addu $t2, $t2, 256
+    sltiu $t6, $t2, 128
+    beq $t6, 1, positive_div_b 
+    # nop
+    not $t2, $t2
+    # nop
+    # xori $t2, $t2, 0xff
+    addi $t2, $t2, 1
 positive_div_b:
+    sw $t1, 0x34($28)
+    sw $t2, 0x38($28)
     xor $t7, $t6, $t5 #check the sign
     sll $t2, $t2, 8
     addi $t3, $t1, 0 #t3 remainder
@@ -384,7 +404,7 @@ positive_div_b:
     li $a0, 0x1000
 loopb:
 # $t1: dividend, $t2: divisor, $t3: remainder, $t4: quot
-    sub $t3,$t3,$t2 #dividend - dividor
+    subu $t3,$t3,$t2 #dividend - dividor
     and $s0,$t3,$a0 # get the higest bit of rem to check if rem<0
     sll $t4,$t4,1 # shift left quot with 1bit
     beq $s0,$0, SdrUq # if rem>=0, shift Div right
@@ -402,12 +422,13 @@ loopb:
     not $t4, $t4
     addi $t4, $t4, 1 
 positive_quot:
-    beq $t5, 0, positive_rem
+    beq $t5, 1, positive_rem
     not $t3, $t3
     addi $t3, $t3, 1    
 positive_rem:
     li $t5, 0
-
+ #   sw $t3, 0x30($28)
+ #   sw $t4, 0x34($28)
 Test_111_loop:
     addi $t5, $t5, 1
     addi $t6, $t3, 0
@@ -416,7 +437,6 @@ Test_111_loop:
     addi $t6, $t4, 0
 Test_111_loop2:
     sw $t6, 0x38($28)
-
     li $26, 0x8C4B40
     li $27, 0
 loop_delay4: # print and stop for 2s
