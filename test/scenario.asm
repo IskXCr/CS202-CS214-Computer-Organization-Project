@@ -335,7 +335,7 @@ positive_b:
     li $t4, 0
     li $a0, 0
     li $a1, 8
-loop:
+loop_mul:
     li $s1, 1
     and $s2, $s1, $t3
     beq $s2, $0, jumpAdd
@@ -344,7 +344,7 @@ jumpAdd:
     sll $t2, $t2, 1
     srl $t3, $t3, 1
     addi $a0, $a0, 1
-    blt $a0, $a1, loop
+    blt $a0, $a1, loop_mul
     beq $t5, 0, positive
     not $t4, $t4
     addi $t4, $t4, 1
