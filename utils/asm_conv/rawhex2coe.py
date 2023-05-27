@@ -1,6 +1,6 @@
 import argparse
 
-def rawhex2coe(file, size):
+def rawhex2coe(file, size: int = 16384):
     lines = []
     with open(file, "r") as f:
         lines = f.readlines()
@@ -9,13 +9,13 @@ def rawhex2coe(file, size):
     with open(new_file, "w") as f:
         f.write("memory_initialization_radix = 16;\n")
         f.write("memory_initialization_vector =\n")
-        lines = list(map(lambda x: x.strip(), lines))[:cmd_args.size]
+        lines = list(map(lambda x: x.strip(), lines))[:size]
         cnt = len(lines)
         f.write(',\n'.join(lines))
 
-        if cnt < cmd_args.size:
+        if cnt < size:
             f.write(",\n")
-            for i in range(cmd_args.size - cnt):
+            for i in range(size - cnt):
                 f.write("00000000,\n")
 
 

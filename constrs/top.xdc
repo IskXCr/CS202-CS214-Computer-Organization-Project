@@ -2,10 +2,18 @@
 set_property IOSTANDARD LVCMOS33 [get_ports *]
 
 set_property PACKAGE_PIN Y18 [get_ports fpga_clk]
+create_clock -period 10 [get_ports fpga_clk]
 
+set_input_delay -clock fpga_clk 2 [get_ports upg_rx_i]
+set_output_delay -clock fpga_clk 2 [get_ports upg_tx_o]
 set_property PACKAGE_PIN Y19 [get_ports upg_rx_i]
 set_property PACKAGE_PIN V18 [get_ports upg_tx_o]
 
+set_input_delay -clock fpga_clk 1 [get_ports {buttons[4]}]
+set_input_delay -clock fpga_clk 1 [get_ports {buttons[3]}]
+set_input_delay -clock fpga_clk 1 [get_ports {buttons[2]}]
+set_input_delay -clock fpga_clk 1 [get_ports {buttons[1]}]
+set_input_delay -clock fpga_clk 1 [get_ports {buttons[0]}]
 set_property PACKAGE_PIN P5 [get_ports {buttons[4]}]
 set_property PACKAGE_PIN P1 [get_ports {buttons[3]}]
 set_property PACKAGE_PIN P4 [get_ports {buttons[2]}]
