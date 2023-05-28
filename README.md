@@ -22,13 +22,17 @@ In this project, a single-cycle MIPS CPU has been designed and tested. The CPU s
 
 ### Overview
 
-![image-20230521182421715](markdown-img/spec1.png)
+<img src="markdown-img/spec0.png" alt="image-20230529025939905" style="zoom:50%;" />
+
+![image-20230521182421715](markdown-img/spec1.png)![image-20230529030020134](markdown-img/spec2.png)
+
+*The 1st one and the 3rd one are flattened.*
 
 **Architecture**: Harvard Architecture.
 
 
 
-### List of Submodules
+### List of CPU Submodules
 
 | Module Name         | Module Definition | Description                                                  | I/O  |
 | ------------------- | ----------------- | ------------------------------------------------------------ | ---- |
@@ -70,12 +74,20 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 | Shift-R        | `sllv rd, rt, rs`         |                        |
 |                | `srlv rd, rt, rs`         |                        |
 |                | `srav rd, rt, rs`         |                        |
+| Data-Transfer  | `mfhi rd`                 |                        |
+|                | `mflo rd`                 |                        |
+|                | `mthi rs`                 |                        |
+|                | `mtlo rs`                 |                        |
 | Arithmetic-R   | `add rd, rs, rt`          |                        |
 |                | `addu rd, rs, rt`         |                        |
 |                | `sub rd, rs, rt`          |                        |
 |                | `subu rd, rs, rt`         |                        |
 |                | `slt rd, rs, rt`          |                        |
 |                | `sltu rd, rs, rt`         |                        |
+|                | `mult rs, rt`             |                        |
+|                | `multu rs, rt`            |                        |
+|                | `div rs, rt`              |                        |
+|                | `divu rs, rt`             |                        |
 | Arithmetic-IMM | `addi rt, rs, immediate`  |                        |
 |                | `addiu rt, rs, immediate` |                        |
 |                | `slti rt, rs, immediate`  |                        |
@@ -99,10 +111,11 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 ### Register Specification
 
-| Register Name | Size     | Description                                                  |
-| ------------- | -------- | ------------------------------------------------------------ |
-| GPR           | 32 Words | General Purpose Register. `$zero` fixed. `$sp` initialized to `0x7fffeffc`. |
-| PC            | 1 Word   | Program Counter                                              |
+| Register Name | Size        | Description                                                  |
+| ------------- | ----------- | ------------------------------------------------------------ |
+| GPR           | 32 Words    | General Purpose Register. `$zero` fixed. `$sp` initialized to `0x7fffeffc`. |
+| PC            | 1 Word      | Program Counter                                              |
+| `hi`/`lo`     | 1 Word Each | Used in `mult`/`div` instructions and `mflo/mfhi/mtlo/mthi` instructions |
 
 
 
@@ -110,46 +123,39 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 ### ALU OpCode Table
 
-| Name  | OpCode Hex |
-| ----- | ---------- |
-| nop   | 0          |
-| and   | 1          |
-| or    | 2          |
-| xor   | 3          |
-| nor   | 4          |
-| lui   | 5          |
-| shift | 6          |
-| add   | 7          |
-| sub   | 8          |
-| slt   | 9          |
-| *mul  | A          |
-| *div  | B          |
-| *mfhi | C          |
-|       |            |
-|       |            |
-|       |            |
-| *mul  | A          |
-| *div  | B          |
-| *mfhi | C          |
-| *mflo | D          |
-| *mthi | E          |
-| *mtlo | F          |
+| Name      | OpCode Hex |
+| --------- | ---------- |
+| nop       | 0          |
+| and       | 1          |
+| or        | 2          |
+| xor       | 3          |
+| nor       | 4          |
+| lui       | 5          |
+| shift     | 6          |
+| add       | 7          |
+| sub       | 8          |
+| slt       | 9          |
+| mult      | A          |
+| div       | B          |
+| mfhi/mflo | C          |
 
 
 
 ### ALU Utility Ports
 
-| I/O  | Port Name   | Description                                                  |
-| ---- | ----------- | ------------------------------------------------------------ |
-| I    | ALU_control | Accepts ALU OpCode                                           |
-| I    | shamt       | Shift amount                                                 |
-| I    | shift_dir   | Shift direction                                              |
-| I    | shift_ari   | Shift arithmetic (right shift support ONLY)                  |
-| I    | do_unsigned | Do unsigned operations (all operations that requires sign-extension or signed-number comparison) |
-| O    | ALU_out     | Result of the ALU operation                                  |
-| O    | overflow    | Whether the operation (arithmetic only) results in an overflow |
-| O    | ALU_eq      | Whether `op_1 == op_2`                                       |
-| O    | ALU_lt      | Whether `op_1 < op_2`                                        |
+| I/O  | Port Name     | Description                                                  |
+| ---- | ------------- | ------------------------------------------------------------ |
+| I    | ALU_control   | Accepts ALU OpCode                                           |
+| I    | shamt         | Shift amount                                                 |
+| I    | shift_dir     | Shift direction                                              |
+| I    | shift_ari     | Shift arithmetic (right shift support ONLY)                  |
+| I    | do_unsigned   | Do unsigned operations (all operations that requires sign-extension or signed-number comparison) |
+| I    | ALU_reg_write | 1 to let ALU write results into `hi`/`lo` register           |
+| I    | ALU_reg_sel   | 0 for selecting the `hi` register, `1` for selecting the `lo` register |
+| O    | ALU_out       | Result of the ALU operation                                  |
+| O    | overflow      | Whether the operation (arithmetic only) results in an overflow |
+| O    | ALU_eq        | Whether `op_1 == op_2`                                       |
+| O    | ALU_lt        | Whether `op_1 < op_2`                                        |
 
 
 
@@ -221,13 +227,15 @@ Pin constraints only work only on *Minisys*.
 
 ### VGA Text Mode Specification
 
-| Variable                     | Value | Description |
-| ---------------------------- | ----- | ----------- |
-| `text_width`                 | 8     |             |
-| `text_height`                | 16    |             |
-| `horizontal_character_count` | 80    |             |
-| `vertical_character_count`   | 30    |             |
-| `total_character_count`      | 2400  |             |
+| Variable                     | Value   | Description |
+| ---------------------------- | ------- | ----------- |
+| `text_width`                 | 8       |             |
+| `text_height`                | 16      |             |
+| `horizontal_character_count` | 80      |             |
+| `vertical_character_count`   | 30      |             |
+| `total_character_count`      | 2400    |             |
+| `colored_output`             | `false` |             |
+| `refresh_rate`               | 60 Hz   |             |
 
 
 
@@ -255,48 +263,34 @@ Pin constraints work on **Minisys** platform only.
 
 
 
-
-
-
-
 ### Constraint Specification
 
-
+Please refer to `constrs/top.xdc`.
 
 
 
 ## Integrated Tests and Results
 
-### Instruction Test
+### Tests
 
-| Test Suite   | Test Name      | Test Subject                                   | Result    |
-| ------------ | -------------- | ---------------------------------------------- | --------- |
-| SIM_CPU_TEST | sim_test_1.asm | Arithmetic and Logical Operations              | Passed    |
-|              | sim_test_2.asm | Data Segment and S/W Operations                | Passed    |
-|              | sim_test_3.asm | Branch and link instructions, with other stuff | Passed    |
-|              | sim_test_4.asm | Interrupt Call and Stack Frame Pointer         | Cancelled |
-
-
-
-### I/O Test
-
-| #Scene | Test Number | Test Subject | Description | Result |
-| ------ | ----------- | ------------ | ----------- | ------ |
-|        |             |              |             |        |
-
-
-
-### Functionality Test
-
-| #Scene | Test Number | Test Subject | Description | Result |
-| ------ | ----------- | ------------ | ----------- | ------ |
-|        |             |              |             |        |
+| Test Suite        | Test Name          | Test Subject                                                 | Result    |
+| ----------------- | ------------------ | ------------------------------------------------------------ | --------- |
+| SIM_CPU_TEST      | sim_test_1.asm     | Arithmetic and Logical Operations                            | Passed    |
+|                   | sim_test_2.asm     | Data Segment and S/W Operations                              | Passed    |
+|                   | sim_test_3.asm     | Branch and link instructions, with other stuff               | Passed    |
+|                   | sim_test_4.asm     | Interrupt Call and Stack Frame Pointer                       | Cancelled |
+|                   | sim_test_5.asm     | slt, sltu                                                    | Passed    |
+| UART_TEST         | uart_test_1.asm    | UART communication                                           | Passed    |
+| VIDEO_TEST        | video_test_1.asm   | Video memory functionality and VGA driver                    | Passed    |
+|                   | video_test_2.asm   | Character set availability                                   | Passed    |
+| LOGICAL_TEST      | logical_test_1.asm | `mult`, `div`, `mflo/mfhi/mtlo/mthi` test                    | Passed    |
+| IO_TEST           | io_test_1.asm      | 7-seg tube MMIO and CPU status                               | Passed    |
+|                   | io_test_2.asm      | 7-seg tube MMIO and MMIO address                             | Passed    |
+|                   |                    |                                                              |           |
+| VIDEO_PLAYER_TEST | video_player.asm   | CPU **overall functionality** test, including branch, bit operations, encoding/decoding. | Passed    |
 
 
 
 ### Testcase Walkthrough
 
-| #Scene | Test Number | Test Subject | Description | Result |
-| ------ | ----------- | ------------ | ----------- | ------ |
-|        |             |              |             |        |
-
+All completed.

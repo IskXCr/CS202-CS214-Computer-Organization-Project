@@ -2,8 +2,7 @@
 
 - for usages of those utilities, please: 
   - run with `-h` option if it is written in Python and with source code
-  - or refer to official document.
-
+  - or refer to the comment within. ***Functions inside the code are provided with detailed comments on how they operate.***
 
 ## ASCII Art Generator
 
