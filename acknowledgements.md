@@ -1,5 +1,9 @@
 # Acknowledgements
 
+## CPU Architecture
+
+Though this the code of CPU is written from scratch in this project, much of it design are from Computer Organization and Design The Hardware Software Interface (David A. Patterson, John L. Hennessy).
+
 ## VGA Driver
 
 ### VGA Text Driver
