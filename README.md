@@ -175,19 +175,6 @@ This is a subset of the MIPS32 instruction set. Exclusions are `mul/div` and cop
 
 
 
-## IO Specification
-
-| Category | Name | Type   | Size | Description |
-| -------- | ---- | ------ | ---- | ----------- |
-| UART     |      |        |      |             |
-| Input    |      | Button |      |             |
-| Input    |      | Switch |      |             |
-| Output   |      | LED    |      |             |
-
-*MMIO specification is listed in the next part.*
-
-
-
 ## Top Specification
 
 ### Memory Specification

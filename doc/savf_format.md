@@ -38,8 +38,8 @@ Frames are of two categories:
 
 | Name        | Code    | Code | Description                                                  |
 | ----------- | ------- | ---- | ------------------------------------------------------------ |
-| Key Frame   | [**K**] | 0    | Key frame that is followed by a list of mapping entries and captures the entire frame in compressed format |
-| Delta Frame | [**D**] | 1    | Delta frame that modifies the previous frame to generate a new frame |
+| Key Frame   | [**K**] | 1    | Key frame that is followed by a list of mapping entries and captures the entire frame in compressed format |
+| Delta Frame | [**D**] | 0    | Delta frame that modifies the previous frame to generate a new frame |
 
 **Each frame must be aligned on a 32-bit boundary.**
 

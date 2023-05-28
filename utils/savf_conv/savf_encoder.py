@@ -530,7 +530,7 @@ class SAVF_Converter:
                     sys.stdout.flush()
                 else:
                     val = vals[i]
-                    info1 = f"frame: {i}, \ttime: {i / 30} s          "
+                    info1 = f"frame: {i}, \ttime: {i * spf} s          "
                     info2 = f"original_info: {frame}          "
                     cls(self.height + 5)
                     # starting 1 line
@@ -558,7 +558,7 @@ class SAVF_Converter:
                         pass
                     cls(self.height + 5)
                     sys.stdout.write(self.key2ascii(frame0))
-                    sys.stdout.write(f"frame: {i}, \ttime: {i / 30} s\n")
+                    sys.stdout.write(f"frame: {i}, \ttime: {i * spf} s\n")
                     sys.stdout.write(f"key_info: {frame0}\n")
                     sys.stdout.write(f"original_info: {frame}\n")
                     sys.stdout.flush()
@@ -657,13 +657,13 @@ def savf_conv(file_pattern: str, output):
 
     print(f"COE output written to {output}")
 
-    # with open("encoded.txt", "w") as f:
-    #     f.writelines(encoded)
+    with open("encoded.txt", "w") as f:
+        f.writelines(encoded)
     
-    # with open("frame_info.txt", "w") as f:
-    #     for frame in compressed:
-    #         f.write(frame.__repr__())
-    #         f.write("\n")
+    with open("frame_info.txt", "w") as f:
+        for frame in compressed:
+            f.write(frame.__repr__())
+            f.write("\n")
 
     decoded = converter.hex2frames(encoded.replace("\n", "").replace("\r", ""))
     print("Decoding completed.")

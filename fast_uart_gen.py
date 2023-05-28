@@ -10,7 +10,11 @@ target_data_coe = f"./coe/empty_data.coe"
 rawhex2coe(f"./coe/{file_name}_text.raw")
 if use_empty_data != "y":
     target_data_coe = f"./coe/{file_name}_data.coe"
-    rawhex2coe(f"./coe/{file_name}_data.raw")
+    try:
+        rawhex2coe(f"./coe/{file_name}_data.raw")
+    except FileNotFoundError:
+        print("Doesn't exist raw data segment. Skipping generating. ")
+        pass
     
 print()
 uart_text_gen(target_text_coe, target_data_coe, new_file=f"./uart_text/{file_name}.txt")
