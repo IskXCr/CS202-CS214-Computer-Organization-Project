@@ -21,4 +21,4 @@ Please refer to [ascgen2's official website](http://sourceforge.net/projects/asc
 
 ## Video Encoder
 
-`savf_conv/savf_encoder`: Convert an ASCII video into a byte stream encoded using Huffman code.
+`savf_conv/savf_encoder.py`: Convert an ASCII video into a compressed byte stream. Conversion can only be done on `40x16` sized frames.

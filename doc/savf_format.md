@@ -18,7 +18,7 @@ M@W08Za2S7ri:;.
 
 ## Specification
 
-**Size**: Fixed **70*30@30fps**
+**Resolution**: Fixed **40*16**, at any frame rate.
 
 **Header**: SAVF has no video header but a terminating frame, indicated by an invalid frame header.
 
@@ -58,10 +58,10 @@ The byte order is *little-endian*, following the convention of MARS and the tool
 
 ##### Key Frame Header:  (32 bit)
 
-| Bit Offset (LSB) | Boundary | Type      | Description                                           |
-| ---------------- | -------- | --------- | ----------------------------------------------------- |
-| 31               | 31       | Key Frame | `0` for **K** and `1` for **D**                       |
-| 0                | 30       | Reserved  | Must be `0`. If full `1`, then this is the last frame |
+| Bit Offset (LSB) | Boundary | Type              | Description                                           |
+| ---------------- | -------- | ----------------- | ----------------------------------------------------- |
+| 31               | 31       | 32-bit Identifier | `0` for **D** and `1` for **K**                       |
+| 0                | 30       | Reserved          | Must be `0`. If full `1`, then this is the last frame |
 
 
 
@@ -71,8 +71,10 @@ The byte order is *little-endian*, following the convention of MARS and the tool
 
 | Bit Offset (LSB) | Boundary | Type               | Description                                                  |
 | ---------------- | -------- | ------------------ | ------------------------------------------------------------ |
-| 15               | 15       | Key Frame          | `0` for **K** and `1` for **D**                              |
+| 15               | 15       | 32-bit Identifier  | `0` for **D** and `1` for **K**                              |
 | 0                | 14       | #Delta Entry Count | Number of entries that records a modification to the previous frame. If `0` then this frame completely the same as the previous one. |
+
+*The identifier is chosen to be 0 here for quick processing.*
 
 
 
@@ -80,7 +82,7 @@ The byte order is *little-endian*, following the convention of MARS and the tool
 
 | Bit Offset (LSB) | Boundary | Name     | Description                      |
 | ---------------- | -------- | -------- | -------------------------------- |
-| 9                | 15       | X-offset | X-axis offset, from `0` to `127` |
-| 4                | 8        | Y-offset | Y-axis offset, from `0` to `31`  |
+| 10               | 15       | Y-offset | Y-axis offset, from `0` to `64`. |
+| 4                | 9        | X-offset | X-axis offset, from `0` to `64`. |
 | 0                | 3        | Char     | Character in 4 bits              |
 
