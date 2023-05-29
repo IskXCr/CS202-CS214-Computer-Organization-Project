@@ -303,13 +303,12 @@ test_101:
     # jal signed_extension
     addi $t3, $t0, 0 # b
     sub $t4, $t2, $t3
-    # t5, t6, t7- signed of a, b, a - b
-    sltiu $t5, $t2, 128
-    sltiu $t6, $t3, 128
-    sltiu $t7, $t4, 128
-    li $s0, 0 # overflow
-    beq $t5, $t6, end_subtraction
-    bne $t6, $t7, end_subtraction
+    # t5 >= 128, t6 < 128
+    li $t5, 127
+    slt $t5, $t5, $t4
+    slti $t6, $t4, -128
+    or $t5, $t5, $t6
+    beq $t5, $zero, end_subtraction
     li $s0, 1 # carry
 end_subtraction:
     sw $t4, 0x38($28)
