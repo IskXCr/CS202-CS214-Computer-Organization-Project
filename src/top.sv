@@ -11,6 +11,8 @@ module top (
     output wire [23:0] led,
     output wire [7:0]  tube_en,
     output wire [7:0]  tube_seg,
+    input  wire [3:0]  keypad_row,
+    output wire [3:0]  keypad_col,
 
     output wire [3:0]  vga_red,
     output wire [3:0]  vga_green,
@@ -263,6 +265,8 @@ module top (
 
                               .buttons(buttons),
                               .switches(switches),
+                              .keypad_row(keypad_row),
+                              .keypad_col(keypad_col),
                               .led(led),
                               .tube_en(tube_en),
                               .tube_seg(tube_seg),

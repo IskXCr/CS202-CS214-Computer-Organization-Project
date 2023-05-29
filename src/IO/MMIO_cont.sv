@@ -17,6 +17,8 @@ module MMIO_cont(
     input  wire uart_done,
     input  wire [4:0]  buttons,
     input  wire [23:0] switches,
+    input  wire [3:0]  keypad_row,
+    output wire [3:0]  keypad_col,
     output wire [23:0] led,
     output wire [7:0]  tube_en,
     output wire [7:0]  tube_seg,
@@ -116,10 +118,17 @@ module MMIO_cont(
 
 
     ///////////////////////////////////////////////////
-
+    wire [7:0] keypad_data;
+    keyboard keypad_cont(.clk(fpga_clk),
+                         .rst(rst),
+                         .row(keypad_row),
+                         .col(keypad_col),
+                         .keyboard_val(4'b0),
+                         .press(1'b0),
+                         .wdata(keypad_data));
     // source: 0x0014, Keypad
     always_comb begin
-        mmio_regs[5] = 32'h0000_0000;
+        mmio_regs[5] = {24'h00_0000, keypad_data};
     end
 
 
