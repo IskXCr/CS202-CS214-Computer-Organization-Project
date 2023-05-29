@@ -75,7 +75,7 @@ module keyboard (
         start <= 0;
     end
     else begin
-        if (idle[col] == 1) state <= state;
+      if (idle[col] == 0) state <= state;
         else begin
             case (keyboard_val)
                 4'b1111: begin 
