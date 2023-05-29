@@ -1,4 +1,4 @@
-# Test Subject: Accumulation and stack frame pointer
+# Test Subject: Multiplication and Division
 
 .text
 	li $t0, 6666

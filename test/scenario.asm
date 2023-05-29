@@ -229,14 +229,14 @@ sum:
 loop_delay2: # print and stop for 2s
     addi $27, $27, 1
     bne $27, $26, loop_delay2
-    sll $zero, $zero, 2 # print and stop for 2s
+    # sll $zero, $zero, 2 # print and stop for 2s
     slti $t0, $a0, 1
     beq $t0, $zero, Base_case2 
     addi $sp, $sp, 8
     jr $ra
 Base_case2:
     addi $a0, $a0, -1
-    jal sum_1
+    jal sum
     lw $a0, 0($sp)
     lw $ra, 4($sp)
     addi $sp, $sp, 8
@@ -308,8 +308,8 @@ test_101:
     sltiu $t6, $t3, 128
     sltiu $t7, $t4, 128
     li $s0, 0 # overflow
-    bne $t5, $t6, end_subtraction
-    beq $t6, $t7, end_subtraction
+    beq $t5, $t6, end_subtraction
+    bne $t6, $t7, end_subtraction
     li $s0, 1 # carry
 end_subtraction:
     sw $t4, 0x38($28)
@@ -375,6 +375,8 @@ test_111:
     sltiu $t5, $t1, 128
     sw $t5, 0x20($28)
     beq $t5, 1, positive_div_a
+    # subu $t1, $zero, $t1
+    # addu $t1, $t1, 256
     #nop
     not $t1, $t1
     # nop
@@ -387,14 +389,17 @@ positive_div_a:
     addi $t2, $t0, 0 # b
     sltiu $t6, $t2, 128
     beq $t6, 1, positive_div_b 
+    # subu $t2, $zero, $t2
+    # addu $t2, $t2, 256
+    # ori $t2, $t2, 0xffffff00
     # nop
     not $t2, $t2
     # nop
     # xori $t2, $t2, 0xff
     addi $t2, $t2, 1
 positive_div_b:
-    sw $t1, 0x34($28)
-    sw $t2, 0x38($28)
+    # sw $t1, 0x30($28)
+    # sw $t2, 0x34($28)
     xor $t7, $t6, $t5 #check the sign
     sll $t2, $t2, 8
     addi $t3, $t1, 0 #t3 remainder
@@ -427,8 +432,8 @@ positive_quot:
     addi $t3, $t3, 1    
 positive_rem:
     li $t5, 0
- #   sw $t3, 0x30($28)
- #   sw $t4, 0x34($28)
+    sw $t3, 0x30($28)
+    sw $t4, 0x34($28)
 Test_111_loop:
     addi $t5, $t5, 1
     addi $t6, $t3, 0
