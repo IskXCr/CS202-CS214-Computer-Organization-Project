@@ -1,5 +1,4 @@
-.eqv SLEEP_TIME_KEY 335200
-.eqv SLEEP_TIME_DELTA 335200
+.eqv CPU_1_FRAME_CLK 1000000
 
 .data
 	sample_header: .word 0x00200261, 0x06610271, 0x0a680671, 0x0e680a71, 0x12680e71, 0x16661271, 0x1a611671, 0x1e611a71, 0x221f1e71, 0x22612257, 0x265a2271, 0x26712661, 0x2a582a4c, 0x2a712a61, 0x2e5c2e4c, 0x2e712e61, 0x0000327c
@@ -16,9 +15,9 @@ main:
 	
 	li $t0, 20000000
 	li $t1, 0
-main_loop:
+main_loop_delay:
 	addi $t1, $t1, 1
-	bne $t1, $t0, main_loop 
+	bne $t1, $t0, main_loop_delay 
 	li $t0, 0x3
 	sw $t0, 0x34($gp)
 	
@@ -36,19 +35,22 @@ func_parser:
 	# parse the frame and draw it
 	# $a0 the starting address of the frame buffer, 40x16
 	# $a1 the starting address of the stream
-	addi $sp, $sp, -20
+	addi $sp, $sp, -24
 	sw $s0, ($sp)
 	sw $s1, 4($sp)
 	sw $s2, 8($sp)
 	sw $s3, 12($sp)
 	sw $ra, 16($sp)
+	sw $gp, 20($sp)
+
 	move $s0, $a0
 	move $s1, $a1
 	li $s2, 0
 	li $s3, 0
-	addi $sp, $sp, -64
-	
+	li $gp, 0xffff0000
+
 	# build character mapping
+	addi $sp, $sp, -64
 	li $t0, 0x20
 	sw $t0, 0x0($sp)
 	li $t0, 0x4d
@@ -85,6 +87,7 @@ func_parser:
 	# $s0 frame buffer, $s1 stream buffer, $s2 frame count
 
 func_parser_main_loop:
+	lw $s7, 0x1c($gp) # fetch the lower 32 bits of the timer
 	# load header
 	lw $t0, ($s1)
 	addi $s1, $s1, 4
@@ -181,12 +184,6 @@ func_parser_parse_key_loop:
 	addi $t0, $t0, 1
 	bne $t0, $t1, func_parser_parse_key_loop
 
-	li $t0, 0
-	li $t1, SLEEP_TIME_KEY
-	sub $t1, $t1, 6128
-func_parser_parse_key_delay:
-	addi $t0, $t0, 1
-	ble $t0, $t1, func_parser_parse_key_delay
 	j func_parser_main_loop_end
 	
 func_parser_parse_delta:
@@ -264,13 +261,6 @@ func_parser_parse_delta_cont:
 	jr $ra
 	
 func_parser_parse_delta_loop_end:
-
-	li $t0, 0
-	li $t1, SLEEP_TIME_DELTA
-	sub $t1, $t1, $k1
-func_parser_parse_delta_delay:
-	addi $t0, $t0, 1
-	ble $t0, $t1, func_parser_parse_delta_delay
 	
 func_parser_main_loop_end:
 	# call buffer filling
@@ -279,6 +269,18 @@ func_parser_main_loop_end:
 	jal func_draw_vga_buf
 	
 	addi $s2, $s2, 1
+	lw $t0, 0x1c($gp) # fetch the lower 32 bits of the timer
+	sub $t0, $s7, $t0
+	li $t1, CPU_1_FRAME_CLK
+	sub $t0, $t1, $t0
+	addi $t0, $t0, -7 # sync with the loop instruction
+	srl $t0, $t0, 2
+	li $t1, 0
+func_parser_delay_loop:
+	addi $t1, $t1, 1
+	nop
+	ble $t0, $t1, func_parser_delay_loop
+
 	j func_parser_main_loop
 	
 func_parser_end:
@@ -286,12 +288,13 @@ func_parser_end:
 	li $t4, 0xffff
 	sw $t4, 0x30($gp)
 	addi $sp, $sp, 64
+	lw $gp, 20($sp)
 	lw $ra, 16($sp)
 	lw $s3, 12($sp)
 	lw $s2, 8($sp)
 	lw $s1, 4($sp)
 	lw $s0, ($sp)
-	addi $sp, $sp, 20
+	addi $sp, $sp, 24
 	jr $ra
 
 end_program:

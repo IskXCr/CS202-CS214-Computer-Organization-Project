@@ -213,6 +213,8 @@ Pin constraints only work only on *Minisys*.
 | 0xffff_000c | R | 1 | SW[15:8] | Operand 1. Sign extension according to specific testcases. |
 | 0xffff_0010 | R | 1 | SW[7:0] | Operand 2. Sign extension according to specific testcases. |
 | 0xffff_0014 | R | 1 | Keypad | Keypad number in hex. Maximum 1 word. |
+| 0xffff_0018 | R | 1 | Timer[63:32] | Timer. Increases 1 every cycle, frequency 100 MHz (relies on `fpga_clk`), bit-width 64. |
+| 0xffff_001c | R | 1 | Timer[31:0] | Timer. Increases 1 every cycle, frequency 100 MHz (relies on `fpga_clk`), bit-width 64. |
 | 0xffff_0020 | R/W | 1 | LED[19] | Single LED indicator.                                      |
 | 0xffff_0024 | R/W | 1 | LED[18] | Single LED indicator                                       |
 | 0xffff_0028 | R/W | 1 | LED[17] | Single LED indicator                                       |
