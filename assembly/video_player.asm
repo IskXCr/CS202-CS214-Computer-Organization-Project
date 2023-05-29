@@ -143,7 +143,6 @@ func_parser_parse_key_loop:
 	sll $t5, $t5, 2
 	add $t5, $t5, $sp
 	lw $t5, ($t5)
-	nop
 	or $t4, $t4, $t5
 	srl $t3, $t3, 4
 	
@@ -206,6 +205,7 @@ func_parser_parse_delta:
 	andi $t0, $t0, 0xffff
 	jal func_parser_parse_delta_cont
 	subi $t1, $t1, 1
+	beq $t1, $zero, func_parser_main_loop_end
 	sll $k1, $t1, 5
 	
 	li $t9, 0
