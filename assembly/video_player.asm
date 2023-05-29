@@ -277,7 +277,6 @@ func_parser_main_loop_end:
 	move $a0, $s0
 	move $a1, $s2
 	jal func_draw_vga_buf
-	beq $s2, 0xF, end_program #debug
 	
 	addi $s2, $s2, 1
 	j func_parser_main_loop

@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
 
 module MMIO_cont(
-    input  wire data_clk, // write data on posedge of this clk
+    input  wire data_clk,  // write data on posedge of this clk
     input  wire fpga_clk,  // 100 MHz clk onboard.
-    input  wire rst,      // clear writable memory
+    input  wire rst,       // clear writable memory
 
     input  wire [31:0] addr, // starting at 0x0000_0000
     input  wire [31:0] write_data,
@@ -225,7 +225,7 @@ module MMIO_cont(
 
     VGA_top VGA_controller(.data_clk(data_clk),
                            .fpga_clk(fpga_clk),
-                           .rst(rst),
+                           .rst(1'b0),
                            .wen(vga_buf_wen),
                            .addr(vga_addr),
                            .write_data(vga_write_data),
