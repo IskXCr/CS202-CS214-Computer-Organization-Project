@@ -14,7 +14,7 @@ main:
 	li $t0, 0x2
 	sw $t0, 0x30($gp)
 	
-	li $t0, 40000000
+	li $t0, 20000000
 	li $t1, 0
 main_loop:
 	addi $t1, $t1, 1
@@ -91,11 +91,15 @@ func_parser_main_loop:
 	bleu $t0, 0x7fffffff, func_parser_parse_delta
 func_parser_parse_key:
 	beq $t0, 0xffffffff, func_parser_end # if the last frame, pause
+	# indicator
+	li $t4, 1
+	sw $t4, 0x30($gp)
 
 	li $t0, 0      # offset
 	li $t1, 80     # threshold
 	move $t2, $s0  # current buffer write position
 func_parser_parse_key_loop:
+	
 	lw $t3, ($s1) # generate in place
 	addi $s1, $s1, 4
 	# loop unrolling
@@ -176,11 +180,6 @@ func_parser_parse_key_loop:
 	# loop end
 	addi $t0, $t0, 1
 	bne $t0, $t1, func_parser_parse_key_loop
-	
-	# call buffer filling
-	move $a0, $s0
-	move $a1, $s2
-	jal func_draw_vga_buf
 
 	li $t0, 0
 	li $t1, SLEEP_TIME_KEY
@@ -191,6 +190,9 @@ func_parser_parse_key_delay:
 	j func_parser_main_loop_end
 	
 func_parser_parse_delta:
+	# indicator
+	li $t4, 2
+	sw $t4, 0x30($gp)
 	# $t0 is the header. Everything else is usable
 	# $s0 frame buffer address 
 	# $s1 stream buffer address, modifiable
@@ -199,13 +201,13 @@ func_parser_parse_delta:
 	# calculate size
 	andi $t1, $t0, 0xffff0000
 	srl $t1, $t1, 16
-	beq $t1, $zero, func_parser_main_loop_end
+	beq $t1, $zero, func_parser_parse_delta_loop_end
 	# $t1 the size of entries
 	# get the first delta entry
 	andi $t0, $t0, 0xffff
 	jal func_parser_parse_delta_cont
 	subi $t1, $t1, 1
-	beq $t1, $zero, func_parser_main_loop_end
+	beq $t1, $zero, func_parser_parse_delta_loop_end
 	sll $k1, $t1, 5
 	
 	li $t9, 0
@@ -238,14 +240,12 @@ func_parser_parse_delta_cont:
 	# $t4 character code
 	sll $t6, $t2, 3
 	sll $t7, $t2, 1
-	add $t2, $t6, $t7
-	sll $t2, $t2, 2
-	add $t2, $t2, $s0
-	andi $t5, $t3, 0xfffc
-	add $t2, $t2, $t5
-	# $t2 the position of word of the character right now
-	andi $t3, $t3, 0x0003
-	# $t3 now the offset of the character in the word
+	add $t2, $t6, $t7 
+	sll $t2, $t2, 2   # get $t2 * 40, the character offset
+	add $t2, $t2, $s0 # position in the frame buffer
+	andi $t5, $t3, 0xfffc # x_position offset
+	add $t2, $t2, $t5 # $t2 the position of word of the character right now
+	andi $t3, $t3, 0x0003 # $t3 now the offset of the character in the word
 	sll $t4, $t4, 2
 	add $t4, $t4, $sp
 	lw $t4, ($t4)
@@ -260,14 +260,10 @@ func_parser_parse_delta_cont:
 	sllv $t4, $t4, $t3
 	or $t6, $t6, $t4
 	sw $t6, ($t2)
-	# The first character is completed
+	# Completed parsing
 	jr $ra
 	
 func_parser_parse_delta_loop_end:
-	# call buffer filling
-	move $a0, $s0
-	move $a1, $s2
-	jal func_draw_vga_buf
 
 	li $t0, 0
 	li $t1, SLEEP_TIME_DELTA
@@ -277,10 +273,19 @@ func_parser_parse_delta_delay:
 	ble $t0, $t1, func_parser_parse_delta_delay
 	
 func_parser_main_loop_end:
+	# call buffer filling
+	move $a0, $s0
+	move $a1, $s2
+	jal func_draw_vga_buf
+	beq $s2, 0xF, end_program #debug
+	
 	addi $s2, $s2, 1
 	j func_parser_main_loop
 	
 func_parser_end:
+	# indicator
+	li $t4, 0xffff
+	sw $t4, 0x30($gp)
 	addi $sp, $sp, 64
 	lw $ra, 16($sp)
 	lw $s3, 12($sp)

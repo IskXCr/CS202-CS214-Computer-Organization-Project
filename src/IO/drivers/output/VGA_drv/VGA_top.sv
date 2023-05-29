@@ -38,7 +38,7 @@ module VGA_top(
 
     ///////////////////////////////////////////////////
     // text controller buffer access
-    wire [9:0] sgn_pos_x, sgn_pos_y; // data length for 480p
+    wire [9:0]  sgn_pos_x, sgn_pos_y; // data length for 480p
     wire [9:0]  cont_buf_addr;
     wire [31:0] cont_buf_data;
     wire [11:0] color_out;

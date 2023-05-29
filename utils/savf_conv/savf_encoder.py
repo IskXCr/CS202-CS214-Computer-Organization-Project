@@ -74,12 +74,13 @@ class SAVF_Frame:
         other.f_type = self.f_type
         other.cmap = self.cmap.copy()
         other.entries = copy.deepcopy(self.entries)
+        other.last_frame = self.last_frame
 
         return other
     
 
     def __repr__(self) -> str:
-        size = (self.width * self.height / 0.5) if self.f_type == "K" else (len(self.entries) * 2 + (0 if len(self.entries) % 2 == 1 else 2))
+        size = (self.width * self.height / 0.5) if self.f_type == "K" else (len(self.entries) * 2 + (2 if len(self.entries) % 2 == 1 else 4))
         return f"<Type {self.f_type} Frame, #delta_entries={len(self.entries)}, width={self.width}, height={self.height}, size={size} bytes>"
 
 
@@ -424,22 +425,29 @@ class SAVF_Converter:
             # parse the header
             header = int(hex_str[idx:idx+8], 16)
             if header > 0x7fffffff:
+                if header == 0xffffffff:
+                    if verbose > 0:
+                        print(f"[Parser][Key] Parsing last frame segment starting from {idx} to {idx + 8}, size={key_frame_size}")
+                    frames.append(self.hex2key(hex_str[idx:idx + 8]))
+                    idx += 8
+                    break
+                else:
                 # Key Frame
-                if verbose > 0:
-                    print(f"[Parser][Key] Parsing frame segment starting from {idx} to {idx+key_frame_size+8}, size={key_frame_size}")
-                frames.append(self.hex2key(hex_str[idx:idx+key_frame_size + 8]))
-                idx += key_frame_size + 8
+                    if verbose > 0:
+                        print(f"[Parser][Key] Parsing frame segment starting from {idx} to {idx + key_frame_size + 8}, size={key_frame_size}")
+                    frames.append(self.hex2key(hex_str[idx:idx + key_frame_size + 8]))
+                    idx += key_frame_size + 8
             else:
                 # Delta Frame
                 delta_frame_size = int(hex_str[idx:idx+4], 16) * 4
                 if delta_frame_size % 8 == 0:
                     delta_frame_size += 4
-                if delta_frame_size > 640:
+                if delta_frame_size > self.width * self.height:
                     print(f"[Parser] Invalid size at idx {idx}: {delta_frame_size}. Parsed header = {hex_str[idx:idx+4]}")
                     sys.exit(1)
                 if verbose > 0:
-                    print(f"[Parser][Delta] Parsing frame segment starting from {idx} to {idx+delta_frame_size+4}, size={delta_frame_size}")
-                frames.append(self.hex2delta(hex_str[idx:idx+delta_frame_size + 4]))
+                    print(f"[Parser][Delta] Parsing frame segment starting from {idx} to {idx + delta_frame_size+4}, size={delta_frame_size}")
+                frames.append(self.hex2delta(hex_str[idx:idx + delta_frame_size + 4]))
                 idx += delta_frame_size + 4
         
         return frames
@@ -491,9 +499,9 @@ class SAVF_Converter:
         if len(substrings[-1]) < vector_size:
             substrings[-1] = "".join(["0" for _ in range(vector_size - len(substrings[-1]))]) + substrings[-1]
 
-        result += "\n".join(substrings)
+        result += ",\n".join(substrings)
 
-        print(f"[frames2coe] {len(substrings)} vectors written. ")
+        print(f"[frames2coe] from hex_str {len(hex_str)} - {len(substrings)} vectors written. ")
         return result
 
 
@@ -647,13 +655,14 @@ def savf_conv(file_pattern: str, output):
     compressed = converter.compress(frames)
     print("Compression completed.")
 
-    encoded = converter.frames2hex(compressed)
+    encoded = converter.frames2hex(compressed, sep=True)
     print("Encoding completed.")
 
     print(f"Encoded length: {len(encoded)}, {len(encoded) / 2} bytes in total")
 
+    coe_result = converter.frames2coe(compressed)
     with open(output, "w") as f:
-        f.writelines(converter.frames2coe(compressed))
+        f.writelines(coe_result)
 
     print(f"COE output written to {output}")
 
