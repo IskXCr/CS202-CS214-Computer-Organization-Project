@@ -106,3 +106,13 @@ set_property PACKAGE_PIN H20 [get_ports {vga_blue[0]}]
 
 set_property PACKAGE_PIN M21 [get_ports {vga_hsync}]
 set_property PACKAGE_PIN L21 [get_ports {vga_vsync}]
+
+set_property PACKAGE_PIN K3 [get_ports {keypad_row[3]}]
+set_property PACKAGE_PIN L3 [get_ports {keypad_row[2]}]
+set_property PACKAGE_PIN J4 [get_ports {keypad_row[1]}]
+set_property PACKAGE_PIN K4 [get_ports {keypad_row[0]}]
+
+set_property PACKAGE_PIN L5 [get_ports {keypad_col[3]}]
+set_property PACKAGE_PIN J6 [get_ports {keypad_col[2]}]
+set_property PACKAGE_PIN K6 [get_ports {keypad_col[1]}]
+set_property PACKAGE_PIN M2 [get_ports {keypad_col[0]}]
