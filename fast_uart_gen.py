@@ -13,7 +13,7 @@ if use_empty_data != "y":
     try:
         rawhex2coe(f"./coe/{file_name}_data.raw")
     except FileNotFoundError:
-        print("Doesn't exist raw data segment. Skipping generating. ")
+        print("Raw data segment doesn't exist. Skipping COE generation. ")
         pass
     
 print()

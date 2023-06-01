@@ -1,4 +1,4 @@
-.eqv CPU_1_FRAME_CLK 1000000
+.eqv CPU_1_FRAME_CLK 0xf4240
 
 .data
 	sample_header: .word 0x00200261, 0x06610271, 0x0a680671, 0x0e680a71, 0x12680e71, 0x16661271, 0x1a611671, 0x1e611a71, 0x221f1e71, 0x22612257, 0x265a2271, 0x26712661, 0x2a582a4c, 0x2a712a61, 0x2e5c2e4c, 0x2e712e61, 0x0000327c
@@ -267,20 +267,27 @@ func_parser_main_loop_end:
 	move $a0, $s0
 	move $a1, $s2
 	jal func_draw_vga_buf
-	
 	addi $s2, $s2, 1
+	
 	lw $t0, 0x1c($gp) # fetch the lower 32 bits of the timer
-	sub $t0, $s7, $t0
+	subu $t0, $t0, $s7 # t0 the current counter
 	li $t1, CPU_1_FRAME_CLK
-	sub $t0, $t1, $t0
-	addi $t0, $t0, -7 # sync with the loop instruction
-	srl $t0, $t0, 2
-	li $t1, 0
-func_parser_delay_loop:
-	addi $t1, $t1, 1
+	addu $t1, $t1, $t0 # $t1 the target counter
+	
+	# fix parity
+	andi $t3, $t1, 1
+	andi $t4, $t0, 1
+	xor $t3, $t3, $t4
+	beq $zero, $t3, func_parser_parity_fix_skip
+	addiu $t0, $t0, 1
+func_parser_parity_fix_skip:
+	li $t2, 2
+	addiu $t0, $t0, 12 # sync with the loop setup instructions
 	nop
-	ble $t0, $t1, func_parser_delay_loop
-
+func_parser_delay_loop:
+	addu, $t0, $t0, $t2
+	bne $t0, $t1, func_parser_delay_loop
+	
 	j func_parser_main_loop
 	
 func_parser_end:

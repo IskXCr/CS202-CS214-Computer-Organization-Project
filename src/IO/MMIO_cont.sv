@@ -127,7 +127,7 @@ module MMIO_cont(
 
     // source: 0x0018, 0x001c, 64-bit Timer
     reg [63:0] timer;
-    always_ff @(posedge fpga_clk, posedge rst) begin
+    always_ff @(posedge data_clk, posedge rst) begin
         if (rst)
             timer <= 64'd0;
         else
