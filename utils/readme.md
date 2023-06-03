@@ -10,7 +10,7 @@ Please refer to [ascgen2's official website](http://sourceforge.net/projects/asc
 
 ## ASM -> COE/UART Data Conversion
 
-`asm_conv/rawhex2coe.py`: Generate COE file from raw file produced by MARS (dump to ...)
+`asm_conv/rawhex2coe.py`: Generate COE file from raw file produced by MARS (dump to ... in **hexadecimal text**)
 
 `asm_conv/uart_text_gen.py`: Generate UART text file by combining two COE files (text/data) produced by `rawhex2coe.py`.
 

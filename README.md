@@ -1,8 +1,9 @@
 # CS202/CS214 Computer Organization Project
 
+
 ## 简介
 
-（~~年轻人第一款可以放视频的CPU~~）计组CPU作业，重新设计的单周期CPU（脱离Lab课件的单独实现），支持MIPS32指令集中除浮点运算和特权级别/Exception处理的大部分指令。CPU支持UART覆写指令内存和数据内存，便于调试。
+（~~年轻人第一款可以放视频的CPU~~）计组CPU作业，重新设计的单周期CPU（脱离Lab课件的单独实现），模块化便于流水线改造，同时支持MIPS32指令集中除浮点运算和特权级别/Exception处理的大部分指令。CPU支持UART覆写指令内存和数据内存，便于调试。
 
 MMIO支持读写VGA显存。显存工作在Text Mode下，读写一块大小为2400 Bytes的文本显存，将至多2400个字符线性映射到屏幕上（从左到右，从上到下）。显示驱动在`./src/IO/drivers/output/VGA_drv/`文件夹下。
 
@@ -16,23 +17,23 @@ MMIO支持读写VGA显存。显存工作在Text Mode下，读写一块大小为2
 
 要实例化这个项目，`git clone`后打开Vivado，在添加源文件时选择添加目录，并将`ip`文件夹（作为RTL文件）`src`文件夹和`constrs`文件夹完全导入即可。
 
-
+![image-20230603225825658](markdown-img/fig2.png)
 
 ## Acknowledgements
 
-Acknowledgements to the sources of image/video resources and assets used can be found in `./acknowledgements.md`.
+You can find acknowledgements to the sources of image/video resources and assets used under `./acknowledgements.md`.
 
 
 
 ## Specification of Custom Formats
 
-Specification of customized formats are under `./doc` folder.
+You can find the specification of customized formats under `./doc` folder.
 
 
 
 ## Introduction
 
-In this project, a single-cycle MIPS CPU has been designed and tested. The CPU supports a subset of the MIPS32 ISA (without support for instructions related to exception handling, coprocessor 0).
+In this project, a single-cycle MIPS CPU has been designed and tested. The CPU supports a subset of the MIPS32 ISA (without support for instructions related to exception handling, coprocessor 0 and multiplier/divider).
 
 
 
@@ -40,9 +41,13 @@ In this project, a single-cycle MIPS CPU has been designed and tested. The CPU s
 
 ### Overview
 
-<img src="markdown-img/spec0.png" alt="image-20230529025939905" style="zoom:50%;" />
+![image-20230603210956580](markdown-img/spec0.png)
 
-![image-20230521182421715](markdown-img/spec1.png)![image-20230529030020134](markdown-img/spec2.png)
+![image-20230603215856268](markdown-img/spec1.png)
+
+![image-20230603211025614](markdown-img/spec2.png)
+
+![image-20230603222547965](markdown-img/spec3.png)
 
 *The 1st one and the 3rd one are flattened.*
 
@@ -231,8 +236,8 @@ Pin constraints only work only on *Minisys*.
 | 0xffff_000c | R | 1 | SW[15:8] | Operand 1. Sign extension according to specific testcases. |
 | 0xffff_0010 | R | 1 | SW[7:0] | Operand 2. Sign extension according to specific testcases. |
 | 0xffff_0014 | R | 1 | Keypad | Keypad number in hex. Maximum 1 word. |
-| 0xffff_0018 | R | 1 | Timer[63:32] | Timer. Increases 1 every cycle, frequency 100 MHz (relies on `fpga_clk`), bit-width 64. |
-| 0xffff_001c | R | 1 | Timer[31:0] | Timer. Increases 1 every cycle, frequency 100 MHz (relies on `fpga_clk`), bit-width 64. |
+| 0xffff_0018 | R | 1 | Timer[63:32] | Timer. Increases 1 every cycle, frequency 100 MHz (relies on `data_clk`), bit-width 64. |
+| 0xffff_001c | R | 1 | Timer[31:0] | Timer. Increases 1 every cycle, frequency 100 MHz (relies on `data_clk`), bit-width 64. |
 | 0xffff_0020 | R/W | 1 | LED[19] | Single LED indicator.                                      |
 | 0xffff_0024 | R/W | 1 | LED[18] | Single LED indicator                                       |
 | 0xffff_0028 | R/W | 1 | LED[17] | Single LED indicator                                       |
