@@ -1,20 +1,38 @@
 # CS202/CS214 Computer Organization Project
 
+## 简介
+
+（~~年轻人第一款可以放视频的CPU~~）计组CPU作业，重新设计的单周期CPU（脱离Lab课件的单独实现），支持MIPS32指令集中除浮点运算和特权级别/Exception处理的大部分指令。CPU支持UART覆写指令内存和数据内存，便于调试。
+
+MMIO支持读写VGA显存。显存工作在Text Mode下，读写一块大小为2400 Bytes的文本显存，将至多2400个字符线性映射到屏幕上（从左到右，从上到下）。显示驱动在`./src/IO/drivers/output/VGA_drv/`文件夹下。
+
+`./doc/vga_text_mode.md`下包含视频编码规范。视频编码采用简单的基于关键帧与变化帧的压缩，方便使用MIPS汇编直接进行操作解码（项目时间问题，整体工期仅有不到5天，除开上课）。
+
+由于~~不想写DDR3内存适配~~工期原因，选择了采用FPGA片上Block RAM存储视频，故实际可用内存数目仅在400000 Bytes左右，个人选择将其压缩为ASCII码。
+
+`./utils/savf_conv/savf_encoder.py`包含一个能够直接对ASCII视频流编码的软件，输出为Vivado可用的32位宽COE文件。使用`./assembly/video_player.asm`可以对其进行解码，其中的`func_draw_vga_buf`函数用于将栈缓冲区中的视频内容写到VGA显存上。
+
+此外，`./utils/font_gen/bin2coe.py`可被用于转码BIOS使用的字体（`.bin`，bitmap格式）到COE文件供Vivado读取（用作VGA驱动自带显存）。
+
+要实例化这个项目，`git clone`后打开Vivado，在添加源文件时选择添加目录，并将`ip`文件夹（作为RTL文件）`src`文件夹和`constrs`文件夹完全导入即可。
+
+
+
 ## Acknowledgements
 
-You can find acknowledgements to the sources of image/video resources and assets used under `./acknowledgements.md`.
+Acknowledgements to the sources of image/video resources and assets used can be found in `./acknowledgements.md`.
 
 
 
 ## Specification of Custom Formats
 
-You can find the specification of customized formats under `./doc` folder.
+Specification of customized formats are under `./doc` folder.
 
 
 
 ## Introduction
 
-In this project, a single-cycle MIPS CPU has been designed and tested. The CPU supports a subset of the MIPS32 ISA (without support for instructions related to exception handling, coprocessor 0 and multiplier/divider).
+In this project, a single-cycle MIPS CPU has been designed and tested. The CPU supports a subset of the MIPS32 ISA (without support for instructions related to exception handling, coprocessor 0).
 
 
 
