@@ -1,5 +1,6 @@
 # CS202/CS214 Computer Organization Project
 
+[Video Preview on Bilibili, with Chinese subtitle](https://www.bilibili.com/video/BV12N411n7kf).
 
 ## 简介
 
